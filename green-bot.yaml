@@ -1,86 +1,87 @@
+---
 #!/usr/bin/env ansible-playbook
 
 - name: green-bot
   hosts: greenya
   become: true
   tasks:
-    - name: Creating project directory and copy everything
-      synchronize:
-        src: ./
-        dest: /opt/green-bot
-        checksum: true
+  - name: Creating project directory and copy everything
+    synchronize:
+      src: ./
+      dest: /opt/green-bot
+      checksum: true
 
-    - name: Updating and upgrading apt packages
-      apt:
-        upgrade: yes
+  - name: Updating and upgrading apt packages
+    apt:
+      upgrade: yes
 
-    - name: Preinstallation process
-      package:
-        name:
-          - ca-certificates
-          - curl
-          - nginx
-          - docker-compose
+  - name: Preinstallation process
+    package:
+      name:
+      - ca-certificates
+      - curl
+      - nginx
+      - docker-compose
 
-    - name: Adding Docker GPG-key
-      apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
+  - name: Adding Docker GPG-key
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
 
-    - name: Adding Docker Repo
-      apt_repository:
-        repo: deb https://download.docker.com/linux/ubuntu bionic stable
-        state: present
+  - name: Adding Docker Repo
+    apt_repository:
+      repo: deb https://download.docker.com/linux/ubuntu bionic stable
+      state: present
 
-    - name: Updating apt and installing docker
-      package:
-        name:
-          - docker-ce
-          - docker-ce-cli
-          - containerd.io
-        state: latest
+  - name: Updating apt and installing docker
+    package:
+      name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      state: latest
 
-    - name: Creating project directory
-      file:
-        path: /etc/green-bot
-        state: directory
+  - name: Creating project directory
+    file:
+      path: /etc/green-bot
+      state: directory
 
-    - name: Setting logrotate for /var/log directory
-      copy:
-        src: /opt/green-auth/configs/green-bot-service_rotate.conf
-        dest: /etc/logrotate.d
-        remote_src: true
+  - name: Setting logrotate for /var/log directory
+    copy:
+      src: /opt/green-auth/configs/green-bot-service_rotate.conf
+      dest: /etc/logrotate.d
+      remote_src: true
 
-    - name: Setting logrotate for Docker
-      copy:
-        src: /opt/green-bot/configs/daemon.json
-        dest: /etc/docker
-        remote_src: true
+  - name: Setting logrotate for Docker
+    copy:
+      src: /opt/green-bot/configs/daemon.json
+      dest: /etc/docker
+      remote_src: true
 
-    - name: Downloading node_exporter
-      get_url:
-        url: https://github.com/prometheus/node_exporter/releases/download/v1.1.0/node_exporter-1.1.0.linux-amd64.tar.gz
-        dest: /opt
+  - name: Downloading node_exporter
+    get_url:
+      url: https://github.com/prometheus/node_exporter/releases/download/v1.1.0/node_exporter-1.1.0.linux-amd64.tar.gz
+      dest: /opt
 
-    - name: Configuring node_exporter
-      unarchive:
-        src: /opt/node_exporter-1.1.0.linux-amd64.tar.gz
-        dest: /opt
-        remote_src: true
+  - name: Configuring node_exporter
+    unarchive:
+      src: /opt/node_exporter-1.1.0.linux-amd64.tar.gz
+      dest: /opt
+      remote_src: true
 
-    - name: Setting node_exporter-service config
-      copy:
-        src: /opt/green-auth/configs/node_exporter.service
-        dest: /etc/systemd/system
-        remote_src: true
+  - name: Setting node_exporter-service config
+    copy:
+      src: /opt/green-auth/configs/node_exporter.service
+      dest: /etc/systemd/system
+      remote_src: true
 
-    - name: Starting node_exporter
-      systemd:
-        name: node_exporter
-        enabled: yes
-        state: started
-        daemon_reload: yes
+  - name: Starting node_exporter
+    systemd:
+      name: node_exporter
+      enabled: yes
+      state: started
+      daemon_reload: yes
 
-    - name: Starting Telegram Bot via Docker-Compose
-      docker_compose:
-        project_src: /opt/green-bot/
+  - name: Starting Telegram Bot via Docker-Compose
+    docker_compose:
+      project_src: /opt/green-bot/
