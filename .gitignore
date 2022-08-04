@@ -1,2 +1,3 @@
 *.swp
 *.pre-commit*
+*.golangci*

@@ -3,8 +3,8 @@ package utils
 import (
     "context"
     "log"
-    "time"
     "strconv"
+    "time"
 
     telebot "gopkg.in/tucnak/telebot.v2"
 )
@@ -18,9 +18,9 @@ func (user Recipient) Recipient() string {
 }
 
 func StartTelegramBot(ctx context.Context, TG_BOT_KEY string) {
-    settings := telebot.Settings {
+    settings := telebot.Settings{
         Token: TG_BOT_KEY,
-        Poller: &telebot.LongPoller {
+        Poller: &telebot.LongPoller{
             Timeout: 1 * time.Second,
         },
     }
@@ -45,10 +45,9 @@ func StartTelegramBot(ctx context.Context, TG_BOT_KEY string) {
         bot.Send(userChat, message)
     })
 
-
     go func() {
         bot.Start()
-    } ()
+    }()
 
     log.Println("Telegram Bot started")
 
