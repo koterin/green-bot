@@ -1,12 +1,12 @@
 package utils
 
 import (
-	"context"
-	"log"
-	"time"
+    "context"
+    "log"
+    "time"
     "strconv"
 
-	telebot "gopkg.in/tucnak/telebot.v2"
+    telebot "gopkg.in/tucnak/telebot.v2"
 )
 
 type Recipient struct {
@@ -18,20 +18,20 @@ func (user Recipient) Recipient() string {
 }
 
 func StartTelegramBot(ctx context.Context, TG_BOT_KEY string) {
-	settings := telebot.Settings {
-		Token: TG_BOT_KEY,
-		Poller: &telebot.LongPoller {
-			Timeout: 1 * time.Second,
-		},
-	}
+    settings := telebot.Settings {
+        Token: TG_BOT_KEY,
+        Poller: &telebot.LongPoller {
+            Timeout: 1 * time.Second,
+        },
+    }
 
-	bot, err := telebot.NewBot(settings)
-	if err != nil {
-		log.Fatal(err)
-	}
+    bot, err := telebot.NewBot(settings)
+    if err != nil {
+        log.Fatal(err)
+    }
 
-	bot.Handle("/start", func(m *telebot.Message) {
-		if !m.Private() {
+    bot.Handle("/start", func(m *telebot.Message) {
+        if !m.Private() {
             log.Println("Error: chat is not private")
             return
         }
@@ -43,17 +43,17 @@ func StartTelegramBot(ctx context.Context, TG_BOT_KEY string) {
 
         message := "Сообщи этот ID админу для авторизации: " + userChat.Recipient()
         bot.Send(userChat, message)
-	})
+    })
 
 
-	go func() {
-		bot.Start()
-	} ()
+    go func() {
+        bot.Start()
+    } ()
 
     log.Println("Telegram Bot started")
 
     <-ctx.Done()
 
     log.Println("Telegram Bot stopped")
-	bot.Stop()
+    bot.Stop()
 }
