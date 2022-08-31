@@ -11,5 +11,6 @@ services:
     environment:
     - TG_BOT_KEY=${TG_BOT_KEY}
     - AUTH_URL=${AUTH_URL}
+    - ORIGIN_URL=${ORIGIN_URL}
     - API_KEY=${API_KEY}
     - LOG_LEVEL=DEBUG

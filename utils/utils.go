@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 
 	"telegram/config"
@@ -12,52 +13,6 @@ import (
 
 	tb "gopkg.in/tucnak/telebot.v2"
 )
-
-func OnStart() func(*tb.Message) {
-	return func(m *tb.Message) {
-		userChat, message := GetId(m)
-		log.Debug(userChat.ID, " ", message)
-
-		if message != "" {
-			if err := isAdmin(userChat.ID); err != nil {
-				log.Info(err)
-				Menu.Reply(
-					Menu.Row(BtnMyId),
-				)
-			} else {
-				log.Info("Admin user signed in: ", m.Sender.Username)
-
-				Menu.Reply(
-					Menu.Row(BtnMyId),
-					Menu.Row(BtnNewUser),
-					Menu.Row(BtnNewOrigin),
-				)
-			}
-
-			Bot.Send(userChat, message, Menu)
-		}
-	}
-}
-
-func NewOrigin() func(*tb.Message) {
-	return func(m *tb.Message) {
-		log.Info("BtnNewOrigin clicked")
-
-		MenuIn.Inline(
-			MenuIn.Row(BtnShowOrigins, BtnAddOrigin),
-		)
-
-		Bot.Send(m.Chat, "hi", MenuIn)
-	}
-}
-
-func ShowMyId() func(*tb.Message) {
-	return func(m *tb.Message) {
-		log.Info("BtnMyId clicked")
-
-		Bot.Send(m.Chat, "hi", MenuIn)
-	}
-}
 
 func GetId(m *tb.Message) (Recipient, string) {
 	var userChat Recipient
@@ -84,7 +39,7 @@ func isAdmin(chatId int) error {
 		return err
 	}
 
-	resp, err := AuthClient.Do(&req)
+	resp, err := BackendClient.Do(&req)
 	if err != nil {
 		log.Error("Error checking admin from Auth Backend: ", err)
 
@@ -113,8 +68,39 @@ func setAdminRequest(chatId int) (http.Request, error) {
 		return http.Request{}, fmt.Errorf("Error creating request to Backend: %w", err)
 	}
 
-	req.Header.Set("X-Green-Origin", "telegram-bot")
-	req.Header.Set("Api-Key", config.Args.API_KEY)
+	setHeaders(req)
 
 	return *req, nil
+}
+
+func setHeaders(req *http.Request) {
+	req.Header.Set("X-Green-Origin", "telegram-bot")
+	req.Header.Set("Api-Key", config.Args.API_KEY)
+}
+
+func getOrigins() (string, error) {
+	req, err := http.NewRequest("GET", config.Args.ORIGIN_URL, nil)
+	if err != nil {
+		return "", fmt.Errorf("Error making GET /origins request: %w", err)
+	}
+
+	setHeaders(req)
+
+	resp, err := BackendClient.Do(req)
+	if err != nil {
+		log.Error("Error calling GET /origins: ", err)
+
+		return "", err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("Error in response from GET /origins")
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("Error reading response from GET /origins")
+	}
+
+	return string(body), err
 }
