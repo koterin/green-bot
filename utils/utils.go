@@ -22,13 +22,7 @@ var (
 	btnNewOrigin = menu.Text("Подключить новый сервис")
 	btnMyId      = menu.Text("Мой ID")
 	AuthClient   = &http.Client{Timeout: 10 * time.Second}
-	settings     = tb.Settings{
-		Token: config.Args.TG_BOT_KEY,
-		Poller: &tb.LongPoller{
-			Timeout: 1 * time.Second,
-		},
-	}
-	bot, errBot = tb.NewBot(settings)
+	bot          = &tb.Bot{}
 )
 
 type Recipient struct {
@@ -40,11 +34,19 @@ func (user Recipient) Recipient() string {
 }
 
 func StartTelegramBot(ctx context.Context) {
-	if errBot != nil {
-		log.Fatal(errBot)
+	settings := tb.Settings{
+		Token: config.Args.TG_BOT_KEY,
+		Poller: &tb.LongPoller{
+			Timeout: 1 * time.Second,
+		},
 	}
 
-	bot.Handle("/start", onStart)
+	bot, _ = tb.NewBot(settings)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+
+	bot.Handle("/start", handler())
 
 	bot.Handle(&btnMyId, func(m *tb.Message) {
 		log.Info("Button My ID")
@@ -82,15 +84,29 @@ func StartTelegramBot(ctx context.Context) {
 	bot.Stop()
 }
 
+func onStart() func(*tb.Message) {
+	return func(m *tb.Message) {
+		//msg, err := bot.Send(userChat, "It is help")
+
+		log.Debug("msg, err")
+		bot.Send(m.Chat, "hi")
+	}
+}
+
 func onStart(m *tb.Message) error {
+	log.Debug("in onStart")
+
 	userChat, message := GetId(m)
+	log.Debug(userChat.ID, " ", message)
+
 	if message != "" {
 		if err := isAdmin(userChat.ID); err != nil {
-			log.Error(err)
+			log.Info(err)
 			menu.Reply(
 				menu.Row(btnMyId),
 			)
 		} else {
+			log.Info("Admin user signed in: ", m.Sender.Username)
 			menu.Reply(
 				menu.Row(btnMyId),
 				menu.Row(btnNewUser),
@@ -98,7 +114,9 @@ func onStart(m *tb.Message) error {
 			)
 		}
 
-		bot.Send(userChat, message, menu)
+		log.Debug("right before bot.Send")
+
+		//	bot.Send(userChat, message, menu)
 
 		return nil
 	}
