@@ -15,8 +15,6 @@ import (
 
 func OnStart() func(*tb.Message) {
 	return func(m *tb.Message) {
-		log.Debug("in onStart")
-
 		userChat, message := GetId(m)
 		log.Debug(userChat.ID, " ", message)
 
@@ -28,6 +26,7 @@ func OnStart() func(*tb.Message) {
 				)
 			} else {
 				log.Info("Admin user signed in: ", m.Sender.Username)
+
 				Menu.Reply(
 					Menu.Row(BtnMyId),
 					Menu.Row(BtnNewUser),
@@ -35,8 +34,31 @@ func OnStart() func(*tb.Message) {
 				)
 			}
 
-			log.Debug("right before bot.Send")
+			Bot.Send(userChat, message, Menu)
+		}
+	}
+}
 
+func NewOrigin() func(*tb.Message) {
+	return func(m *tb.Message) {
+		log.Info("BtnNewOrigin clicked")
+
+		userChat, message := GetId(m)
+		log.Debug(userChat.ID, " ", message)
+
+		MenuIn.Inline(
+			MenuIn.Row(BtnShowOrigins, BtnAddOrigin),
+		)
+	}
+}
+
+func ShowMyId() func(*tb.Message) {
+	return func(m *tb.Message) {
+		log.Info("BtnMyId clicked")
+
+		userChat, message := GetId(m)
+
+		if message != "" {
 			Bot.Send(userChat, message, Menu)
 		}
 	}
@@ -75,8 +97,6 @@ func isAdmin(chatId int) error {
 	}
 
 	if resp.StatusCode != http.StatusAccepted {
-		log.Error("User is not an admin, ID = ", chatId, " resp code is ", resp.StatusCode)
-
 		return fmt.Errorf("User with ID = %d is not an admin", chatId)
 	}
 

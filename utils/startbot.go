@@ -14,12 +14,15 @@ import (
 )
 
 var (
-	Menu         = &tb.ReplyMarkup{}
-	BtnNewUser   = Menu.Text("Добавить нового пользователя")
-	BtnNewOrigin = Menu.Text("Подключить новый сервис")
-	BtnMyId      = Menu.Text("Мой ID")
-	AuthClient   = &http.Client{Timeout: 10 * time.Second}
-	Bot          = &tb.Bot{}
+	Menu           = &tb.ReplyMarkup{}
+	MenuIn         = &tb.ReplyMarkup{}
+	BtnNewUser     = Menu.Text("Добавить нового пользователя")
+	BtnNewOrigin   = Menu.Text("Подключить новый сервис")
+	BtnMyId        = Menu.Text("Мой ID")
+	BtnShowOrigins = MenuIn.Data("Подключенные сервисы", "origins")
+	BtnAddOrigin   = MenuIn.Data("Добавить новый", "newOrigin")
+	AuthClient     = &http.Client{Timeout: 10 * time.Second}
+	Bot            = &tb.Bot{}
 )
 
 type Recipient struct {
@@ -39,35 +42,19 @@ func StartTelegramBot(ctx context.Context) {
 	}
 
 	Bot, _ = tb.NewBot(settings)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
 
 	Bot.Handle("/start", OnStart())
-
-	Bot.Handle(&BtnMyId, func(m *tb.Message) {
-		log.Info("Button My ID")
-		userChat, message := GetId(m)
-		if message != "" {
-			Bot.Send(userChat, message, Menu)
-		}
-	})
+	Bot.Handle(&BtnMyId, ShowMyId())
 
 	Bot.Handle(&BtnNewUser, func(m *tb.Message) {
-		log.Info("Button NewUser")
+		log.Info("BtnNewUser clicked")
 		userChat, message := GetId(m)
 		if message != "" {
 			Bot.Send(userChat, message, Menu)
 		}
 	})
 
-	Bot.Handle(&BtnNewOrigin, func(m *tb.Message) {
-		log.Info("Button NewOrigin")
-		userChat, message := GetId(m)
-		if message != "" {
-			Bot.Send(userChat, message, Menu)
-		}
-	})
+	Bot.Handle(&BtnNewOrigin, NewOrigin())
 
 	go func() {
 		Bot.Start()
