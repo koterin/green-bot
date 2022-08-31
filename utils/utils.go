@@ -2,12 +2,9 @@ package utils
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
-	"time"
 
 	"telegram/config"
 
@@ -16,112 +13,33 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-var (
-	menu         = &tb.ReplyMarkup{}
-	btnNewUser   = menu.Text("Добавить нового пользователя")
-	btnNewOrigin = menu.Text("Подключить новый сервис")
-	btnMyId      = menu.Text("Мой ID")
-	AuthClient   = &http.Client{Timeout: 10 * time.Second}
-	bot          = &tb.Bot{}
-)
-
-type Recipient struct {
-	ID int
-}
-
-func (user Recipient) Recipient() string {
-	return strconv.Itoa(user.ID)
-}
-
-func StartTelegramBot(ctx context.Context) {
-	settings := tb.Settings{
-		Token: config.Args.TG_BOT_KEY,
-		Poller: &tb.LongPoller{
-			Timeout: 1 * time.Second,
-		},
-	}
-
-	bot, _ = tb.NewBot(settings)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-
-	bot.Handle("/start", handler())
-
-	bot.Handle(&btnMyId, func(m *tb.Message) {
-		log.Info("Button My ID")
-		userChat, message := GetId(m)
-		if message != "" {
-			bot.Send(userChat, message, menu)
-		}
-	})
-
-	bot.Handle(&btnNewUser, func(m *tb.Message) {
-		log.Info("Button NewUser")
-		userChat, message := GetId(m)
-		if message != "" {
-			bot.Send(userChat, message, menu)
-		}
-	})
-
-	bot.Handle(&btnNewOrigin, func(m *tb.Message) {
-		log.Info("Button NewOrigin")
-		userChat, message := GetId(m)
-		if message != "" {
-			bot.Send(userChat, message, menu)
-		}
-	})
-
-	go func() {
-		bot.Start()
-	}()
-
-	log.Info("Telegram Bot started")
-
-	<-ctx.Done()
-
-	log.Info("Telegram Bot stopped")
-	bot.Stop()
-}
-
-func onStart() func(*tb.Message) {
+func OnStart() func(*tb.Message) {
 	return func(m *tb.Message) {
-		//msg, err := bot.Send(userChat, "It is help")
+		log.Debug("in onStart")
 
-		log.Debug("msg, err")
-		bot.Send(m.Chat, "hi")
-	}
-}
+		userChat, message := GetId(m)
+		log.Debug(userChat.ID, " ", message)
 
-func onStart(m *tb.Message) error {
-	log.Debug("in onStart")
+		if message != "" {
+			if err := isAdmin(userChat.ID); err != nil {
+				log.Info(err)
+				Menu.Reply(
+					Menu.Row(BtnMyId),
+				)
+			} else {
+				log.Info("Admin user signed in: ", m.Sender.Username)
+				Menu.Reply(
+					Menu.Row(BtnMyId),
+					Menu.Row(BtnNewUser),
+					Menu.Row(BtnNewOrigin),
+				)
+			}
 
-	userChat, message := GetId(m)
-	log.Debug(userChat.ID, " ", message)
+			log.Debug("right before bot.Send")
 
-	if message != "" {
-		if err := isAdmin(userChat.ID); err != nil {
-			log.Info(err)
-			menu.Reply(
-				menu.Row(btnMyId),
-			)
-		} else {
-			log.Info("Admin user signed in: ", m.Sender.Username)
-			menu.Reply(
-				menu.Row(btnMyId),
-				menu.Row(btnNewUser),
-				menu.Row(btnNewOrigin),
-			)
+			Bot.Send(userChat, message, Menu)
 		}
-
-		log.Debug("right before bot.Send")
-
-		//	bot.Send(userChat, message, menu)
-
-		return nil
 	}
-
-	return fmt.Errorf("Error getting chatId from user %s", m.Sender.Username)
 }
 
 func GetId(m *tb.Message) (Recipient, string) {
