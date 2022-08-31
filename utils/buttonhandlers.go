@@ -43,29 +43,20 @@ func NewOrigin() func(*tb.Message) {
 	}
 }
 
-func ShowOrigins() func(*tb.Message) {
-	return func(m *tb.Message) {
+func ShowOrigins() func(*tb.Callback) {
+	return func(c *tb.Callback) {
 		log.Info("BtnShowOrigins clicked")
-
-		userChat, message := GetId(m)
-		if message != "" {
-			if err := isAdmin(userChat.ID); err != nil {
-				log.Info(err)
-				Bot.Send(m.Chat, TextAdminRestricted)
-
-				return
-			}
-		}
 
 		origins, err := getOrigins()
 		if err != nil {
 			log.Info(err)
-			Bot.Send(m.Chat, TextInternalError)
+			Bot.Send(c.Sender, TextInternalError)
 
 			return
 		}
 
-		Bot.Send(m.Chat, origins, MenuIn)
+		Bot.Send(c.Sender, origins, MenuIn)
+		Bot.Respond(c, &tb.CallbackResponse{})
 	}
 }
 
