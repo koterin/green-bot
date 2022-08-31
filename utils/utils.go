@@ -14,6 +14,11 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
+type ResponseData struct {
+	Status  int    `json:"status"`
+	Origins string `json:"origins"`
+}
+
 func GetId(m *tb.Message) (Recipient, string) {
 	var userChat Recipient
 
@@ -79,6 +84,8 @@ func setHeaders(req *http.Request) {
 }
 
 func getOrigins() (string, error) {
+	var data ResponseData
+
 	req, err := http.NewRequest("GET", config.Args.ORIGIN_URL, nil)
 	if err != nil {
 		return "", fmt.Errorf("Error making GET /origins request: %w", err)
@@ -102,5 +109,10 @@ func getOrigins() (string, error) {
 		return "", fmt.Errorf("Error reading response from GET /origins")
 	}
 
-	return string(body), err
+	err = json.Unmarshal([]byte(body), &data)
+	if err != nil {
+		return "", fmt.Errorf("\nError unmarshalling response JSON %w", err)
+	}
+
+	return data.Origins, err
 }

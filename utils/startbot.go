@@ -18,7 +18,7 @@ var (
 	TextAddOrigin       = "Тут можно добавить новый сервис для авторизации. Важно! Сам сервис уже должен быть закрыт green-proxy"
 	TextAdminRestricted = "Эта опция только для админов."
 	TextInternalError   = "Что-то пошло не так. Попробуй еще"
-	Menu                = &tb.ReplyMarkup{}
+	Menu                = &tb.ReplyMarkup{ResizeReplyKeyboard: true}
 	MenuIn              = &tb.ReplyMarkup{}
 	BtnNewUser          = Menu.Text("Добавить нового пользователя")
 	BtnNewOrigin        = Menu.Text("Подключить новый сервис")
