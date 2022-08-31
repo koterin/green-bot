@@ -43,12 +43,11 @@ func NewOrigin() func(*tb.Message) {
 	return func(m *tb.Message) {
 		log.Info("BtnNewOrigin clicked")
 
-		userChat, message := GetId(m)
-		log.Debug(userChat.ID, " ", message)
-
 		MenuIn.Inline(
 			MenuIn.Row(BtnShowOrigins, BtnAddOrigin),
 		)
+
+		Bot.Send(m.Chat, "hi", MenuIn)
 	}
 }
 
@@ -56,11 +55,7 @@ func ShowMyId() func(*tb.Message) {
 	return func(m *tb.Message) {
 		log.Info("BtnMyId clicked")
 
-		userChat, message := GetId(m)
-
-		if message != "" {
-			Bot.Send(userChat, message, Menu)
-		}
+		Bot.Send(m.Chat, "hi", MenuIn)
 	}
 }
 
