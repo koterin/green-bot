@@ -10,3 +10,5 @@ services:
     restart: unless-stopped
     environment:
     - TG_BOT_KEY=${TG_BOT_KEY}
+    - AUTH_URL=${AUTH_URL}
+    - API_KEY=${API_KEY}

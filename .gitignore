@@ -1,5 +1,5 @@
 *.swp
 *.pre-commit*
 *.golangci*
-*.env
+.env
 *.cache_ggshield
