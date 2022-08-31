@@ -12,3 +12,4 @@ services:
     - TG_BOT_KEY=${TG_BOT_KEY}
     - AUTH_URL=${AUTH_URL}
     - API_KEY=${API_KEY}
+    - LOG_LEVEL=DEBUG

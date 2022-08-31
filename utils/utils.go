@@ -22,6 +22,13 @@ var (
 	btnNewOrigin = menu.Text("Подключить новый сервис")
 	btnMyId      = menu.Text("Мой ID")
 	AuthClient   = &http.Client{Timeout: 10 * time.Second}
+	settings     = tb.Settings{
+		Token: config.Args.TG_BOT_KEY,
+		Poller: &tb.LongPoller{
+			Timeout: 1 * time.Second,
+		},
+	}
+	bot, errBot = tb.NewBot(settings)
 )
 
 type Recipient struct {
@@ -33,39 +40,14 @@ func (user Recipient) Recipient() string {
 }
 
 func StartTelegramBot(ctx context.Context) {
-	settings := tb.Settings{
-		Token: config.Args.TG_BOT_KEY,
-		Poller: &tb.LongPoller{
-			Timeout: 1 * time.Second,
-		},
+	if errBot != nil {
+		log.Fatal(errBot)
 	}
 
-	bot, err := tb.NewBot(settings)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	bot.Handle("/start", func(m *tb.Message) {
-		userChat, message := GetId(m)
-		if message != "" {
-			if err := isAdmin(userChat.ID); err != nil {
-				menu.Reply(
-					menu.Row(btnMyId),
-				)
-			} else {
-				menu.Reply(
-					menu.Row(btnMyId),
-					menu.Row(btnNewUser),
-					menu.Row(btnNewOrigin),
-				)
-			}
-
-			bot.Send(userChat, message, menu)
-		}
-
-	})
+	bot.Handle("/start", onStart)
 
 	bot.Handle(&btnMyId, func(m *tb.Message) {
+		log.Info("Button My ID")
 		userChat, message := GetId(m)
 		if message != "" {
 			bot.Send(userChat, message, menu)
@@ -73,6 +55,7 @@ func StartTelegramBot(ctx context.Context) {
 	})
 
 	bot.Handle(&btnNewUser, func(m *tb.Message) {
+		log.Info("Button NewUser")
 		userChat, message := GetId(m)
 		if message != "" {
 			bot.Send(userChat, message, menu)
@@ -80,6 +63,7 @@ func StartTelegramBot(ctx context.Context) {
 	})
 
 	bot.Handle(&btnNewOrigin, func(m *tb.Message) {
+		log.Info("Button NewOrigin")
 		userChat, message := GetId(m)
 		if message != "" {
 			bot.Send(userChat, message, menu)
@@ -96,6 +80,30 @@ func StartTelegramBot(ctx context.Context) {
 
 	log.Info("Telegram Bot stopped")
 	bot.Stop()
+}
+
+func onStart(m *tb.Message) error {
+	userChat, message := GetId(m)
+	if message != "" {
+		if err := isAdmin(userChat.ID); err != nil {
+			log.Error(err)
+			menu.Reply(
+				menu.Row(btnMyId),
+			)
+		} else {
+			menu.Reply(
+				menu.Row(btnMyId),
+				menu.Row(btnNewUser),
+				menu.Row(btnNewOrigin),
+			)
+		}
+
+		bot.Send(userChat, message, menu)
+
+		return nil
+	}
+
+	return fmt.Errorf("Error getting chatId from user %s", m.Sender.Username)
 }
 
 func GetId(m *tb.Message) (Recipient, string) {
@@ -116,25 +124,46 @@ func GetId(m *tb.Message) (Recipient, string) {
 }
 
 func isAdmin(chatId int) error {
-	body, err := json.Marshal(map[string]string{
-		"userChatId": fmt.Sprintf("%d", chatId),
-	})
+	req, err := setAdminRequest(chatId)
 	if err != nil {
-		return fmt.Errorf("Error creating json body: %w", err)
+		log.Error("Error setting request for admin: ", err)
+
+		return err
 	}
 
-	responseBody := bytes.NewReader(body)
-
-	resp, err := AuthClient.Post(config.Args.AUTH_URL, "application/json", responseBody)
+	resp, err := AuthClient.Do(&req)
 	if err != nil {
 		log.Error("Error checking admin from Auth Backend: ", err)
 
 		return err
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusAccepted {
+		log.Error("User is not an admin, ID = ", chatId, " resp code is ", resp.StatusCode)
+
 		return fmt.Errorf("User with ID = %d is not an admin", chatId)
 	}
 
 	return nil
+}
+
+func setAdminRequest(chatId int) (http.Request, error) {
+	body, err := json.Marshal(map[string]string{
+		"chat-id": fmt.Sprintf("%d", chatId),
+	})
+	if err != nil {
+		return http.Request{}, fmt.Errorf("Error creating json body: %w", err)
+	}
+
+	responseBody := bytes.NewReader(body)
+
+	req, err := http.NewRequest("POST", config.Args.AUTH_URL, responseBody)
+	if err != nil {
+		return http.Request{}, fmt.Errorf("Error creating request to Backend: %w", err)
+	}
+
+	req.Header.Set("X-Green-Origin", "telegram-bot")
+	req.Header.Set("Api-Key", config.Args.API_KEY)
+
+	return *req, nil
 }

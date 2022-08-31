@@ -10,6 +10,7 @@ var Args struct {
 	TG_BOT_KEY string `arg:"required,env"`
 	API_KEY    string `arg:"required,env"`
 	AUTH_URL   string `arg:"required,env"`
+	LOG_LEVEL  string `arg:"required,env"`
 }
 
 func Validate() {
