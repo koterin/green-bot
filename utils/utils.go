@@ -1,59 +1,70 @@
 package utils
 
 import (
-    "context"
-    "strconv"
-    "time"
+	"context"
+	"strconv"
+	"time"
 
-    log "github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
-    telebot "gopkg.in/tucnak/telebot.v2"
+	tb "gopkg.in/tucnak/telebot.v2"
+)
+
+var (
+	menu       = &tb.ReplyMarkup{}
+	btnNewUser = menu.Text("Добавить нового пользователя")
+	btnMyId    = menu.Text("Мой ID")
 )
 
 type Recipient struct {
-    ID int
+	ID int
 }
 
 func (user Recipient) Recipient() string {
-    return strconv.Itoa(user.ID)
+	return strconv.Itoa(user.ID)
 }
 
 func StartTelegramBot(ctx context.Context, TG_BOT_KEY string) {
-    settings := telebot.Settings{
-        Token: TG_BOT_KEY,
-        Poller: &telebot.LongPoller{
-            Timeout: 1 * time.Second,
-        },
-    }
+	settings := tb.Settings{
+		Token: TG_BOT_KEY,
+		Poller: &tb.LongPoller{
+			Timeout: 1 * time.Second,
+		},
+	}
 
-    bot, err := telebot.NewBot(settings)
-    if err != nil {
-        log.Fatal(err)
-    }
+	bot, err := tb.NewBot(settings)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-    bot.Handle("/start", func(m *telebot.Message) {
-        if !m.Private() {
-            log.Error("Error: chat is not private")
-            return
-        }
+	menu.Reply(
+		menu.Row(btnMyId),
+		menu.Row(btnNewUser),
+	)
 
-        log.Info("User started bot: ", m.Sender.Username)
+	bot.Handle("/start", func(m *tb.Message) {
+		if !m.Private() {
+			log.Error("Error: chat is not private")
+			return
+		}
 
-        var userChat Recipient
-        userChat.ID = int(m.Chat.ID)
+		log.Info("User started bot: ", m.Sender.Username)
 
-        message := "Сообщи этот ID админу для авторизации: " + userChat.Recipient()
-        bot.Send(userChat, message)
-    })
+		var userChat Recipient
+		userChat.ID = int(m.Chat.ID)
 
-    go func() {
-        bot.Start()
-    }()
+		message := "Сообщи этот ID админу для авторизации: " + userChat.Recipient()
+		bot.Send(userChat, message, menu)
+	})
 
-    log.Info("Telegram Bot started")
+	go func() {
+		bot.Start()
+	}()
 
-    <-ctx.Done()
+	log.Info("Telegram Bot started")
 
-    log.Info("Telegram Bot stopped")
-    bot.Stop()
+	<-ctx.Done()
+
+	log.Info("Telegram Bot stopped")
+	bot.Stop()
 }
