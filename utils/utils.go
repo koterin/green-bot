@@ -27,8 +27,6 @@ func GetId(m *tb.Message) (Recipient, string) {
 		return Recipient{}, ""
 	}
 
-	log.Info("User started bot: ", m.Sender.Username)
-
 	userChat.ID = int(m.Chat.ID)
 
 	message := "Сообщи этот ID админу для авторизации: " + userChat.Recipient()
@@ -115,4 +113,14 @@ func getOrigins() (string, error) {
 	}
 
 	return data.Origins, err
+}
+
+func AddUserState(chatID int64, state string, msgID int) {
+	if _, userExist := UserStates[chatID]; !userExist {
+		UserStates[chatID] = make(map[string]int)
+	}
+
+	UserStates[chatID][state] = msgID
+
+	log.Debug("current map: ", UserStates)
 }

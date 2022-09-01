@@ -14,20 +14,9 @@ import (
 )
 
 var (
-	TextAddUser         = "Тут можно добавить нового пользователя - но обязательно для какого-то определенного сервиса. Например, разрешить пользователю test@test.com доступ к test.example.com"
-	TextAddOrigin       = "Тут можно добавить новый сервис для авторизации. Важно! Сам сервис уже должен быть закрыт green-proxy"
-	TextAdminRestricted = "Эта опция только для админов."
-	TextInternalError   = "Что-то пошло не так. Попробуй еще"
-	Menu                = &tb.ReplyMarkup{ResizeReplyKeyboard: true}
-	MenuIn              = &tb.ReplyMarkup{}
-	BtnNewUser          = Menu.Text("Добавить нового пользователя")
-	BtnNewOrigin        = Menu.Text("Подключить новый сервис")
-	BtnMyId             = Menu.Text("Мой ID")
-	BtnShowOrigins      = MenuIn.Data("Подключенные сервисы", "origins")
-	BtnAddOrigin        = MenuIn.Data("Добавить новый", "newOrigin")
-	BtnAddUser          = MenuIn.Data("Добавить нового", "newUsers")
-	BackendClient       = &http.Client{Timeout: 10 * time.Second}
-	Bot                 = &tb.Bot{}
+	UserStates    = make(map[int64]map[string]int) // map['chatID'] = map'btnAddOrigin' = 'message.ID'
+	BackendClient = &http.Client{Timeout: 10 * time.Second}
+	Bot           = &tb.Bot{}
 )
 
 type Recipient struct {
@@ -48,11 +37,16 @@ func StartTelegramBot(ctx context.Context) {
 
 	Bot, _ = tb.NewBot(settings)
 
+	Bot.Handle(tb.OnText, OnText())
 	Bot.Handle("/start", OnStart())
 	Bot.Handle(&BtnMyId, ShowMyId())
 	Bot.Handle(&BtnNewUser, NewUser())
 	Bot.Handle(&BtnNewOrigin, NewOrigin())
+
+	// Inline:
 	Bot.Handle(&BtnShowOrigins, ShowOrigins())
+	Bot.Handle(&BtnAddOrigin, AddOrigin())
+	Bot.Handle(&BtnAddUser, AddUser())
 
 	go func() {
 		Bot.Start()
