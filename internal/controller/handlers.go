@@ -63,7 +63,7 @@ func AddOrigin() func(*tb.Callback) {
 
 		log.Debug("message.ID: ", c.Message.ID)
 
-		utils.AddUserState(c.Message.Chat.ID, "btnAddOrigin", c.Message.ID+2)
+		utils.AddUserState(c.Message.Chat.ID, entity.StateAddOrigin, c.Message.ID+2)
 
 		Bot.Send(c.Sender, entity.TextSendHostMsg)
 		Bot.Respond(c, &tb.CallbackResponse{})
@@ -121,7 +121,7 @@ func AddUser() func(*tb.Callback) {
 
 		log.Debug("message.ID: ", c.Message.ID)
 
-		utils.AddUserState(c.Message.Chat.ID, "btnAddUser", c.Message.ID+2)
+		utils.AddUserState(c.Message.Chat.ID, entity.StateAddUserEmail, c.Message.ID+2)
 
 		Bot.Send(c.Sender, entity.TextSendEmailMsg)
 		Bot.Respond(c, &tb.CallbackResponse{})
@@ -131,14 +131,10 @@ func AddUser() func(*tb.Callback) {
 func OnText() func(*tb.Message) {
 	return func(m *tb.Message) {
 		var (
-			msgWanted bool
-			state     string
-			msgID     int
+			state string
+			msgID int
+			msg   string
 		)
-
-		log.Info("Text received")
-		log.Debug("m.Chat.ID: ", m.Chat.ID)
-		log.Debug("m.ID: ", m.ID)
 
 		if _, userExist := utils.UserStates[m.Chat.ID]; !userExist {
 			utils.UserStates[m.Chat.ID] = make(map[string]int)
@@ -146,17 +142,21 @@ func OnText() func(*tb.Message) {
 
 		for state, msgID = range utils.UserStates[m.Chat.ID] {
 			if msgID == m.ID {
-				msgWanted = true
+				switch state {
+				case entity.StateAddOrigin:
+					msg = utils.ValidateOrigin(m.Text)
+				case entity.StateAddUserEmail:
+					msg = "StateAddUserEmail"
+				case entity.StateAddUserHost:
+					msg = "StateAddUserHost"
+				}
 
-				break
+				Bot.Send(m.Chat, msg)
+
+				return
 			}
 		}
 
-		if !msgWanted {
-			return
-		}
-
-		text := "I wanted this message for state = " + state
-		Bot.Send(m.Chat, text)
+		log.Debug("i don't need this message")
 	}
 }

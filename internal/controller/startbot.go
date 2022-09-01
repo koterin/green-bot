@@ -23,13 +23,15 @@ func StartTelegramBot(ctx context.Context) {
 
 	Bot, _ = tb.NewBot(settings)
 
-	Bot.Handle(tb.OnText, OnText())
 	Bot.Handle("/start", OnStart())
+	Bot.Handle(tb.OnText, OnText())
+
+	// Buttons
 	Bot.Handle(&BtnMyId, ShowMyId())
 	Bot.Handle(&BtnNewUser, NewUser())
 	Bot.Handle(&BtnNewOrigin, NewOrigin())
 
-	// Inline:
+	// Inline Buttons
 	Bot.Handle(&BtnShowOrigins, ShowOrigins())
 	Bot.Handle(&BtnAddOrigin, AddOrigin())
 	Bot.Handle(&BtnAddUser, AddUser())

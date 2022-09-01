@@ -94,18 +94,18 @@ func GetOrigins() (string, error) {
 
 	resp, err := BackendClient.Do(req)
 	if err != nil {
-		log.Error("Error calling GET /origins: ", err)
+		log.Error("\nError calling GET /origins: ", err)
 
 		return "", err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("Error in response from GET /origins")
+		return "", fmt.Errorf("\nError in response from GET /origins")
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf("Error reading response from GET /origins")
+		return "", fmt.Errorf("\nError reading response from GET /origins")
 	}
 
 	err = json.Unmarshal([]byte(body), &data)
@@ -124,4 +124,8 @@ func AddUserState(chatID int64, state string, msgID int) {
 	UserStates[chatID][state] = msgID
 
 	log.Debug("current map: ", UserStates)
+}
+
+func ValidateOrigin(origin string) string {
+	return (origin + " accepted")
 }
