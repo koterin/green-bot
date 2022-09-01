@@ -6,7 +6,7 @@ import (
 	"os/signal"
 
 	"telegram/config"
-	"telegram/utils"
+	"telegram/internal/controller"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -27,7 +27,7 @@ func main() {
 	//log.SetFormatter(&log.JSONFormatter{})
 	log.SetLevel(level)
 
-	go utils.StartTelegramBot(ctx)
+	go controller.StartTelegramBot(ctx)
 
 	<-c
 	cancel()

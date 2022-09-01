@@ -6,25 +6,26 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"telegram/config"
+	"telegram/internal/entity"
 
 	log "github.com/sirupsen/logrus"
-
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-type ResponseData struct {
-	Status  int    `json:"status"`
-	Origins string `json:"origins"`
-}
+var (
+	BackendClient = &http.Client{Timeout: 10 * time.Second}
+	UserStates    = make(map[int64]map[string]int) // map['chatID'] = map'btnAddOrigin' = 'message.ID'
+)
 
-func GetId(m *tb.Message) (Recipient, string) {
-	var userChat Recipient
+func GetId(m *tb.Message) (entity.Recipient, string) {
+	var userChat entity.Recipient
 
 	if !m.Private() {
 		log.Error("Error: chat is not private")
-		return Recipient{}, ""
+		return entity.Recipient{}, ""
 	}
 
 	userChat.ID = int(m.Chat.ID)
@@ -34,7 +35,7 @@ func GetId(m *tb.Message) (Recipient, string) {
 	return userChat, message
 }
 
-func isAdmin(chatId int) error {
+func IsAdmin(chatId int) error {
 	req, err := setAdminRequest(chatId)
 	if err != nil {
 		log.Error("Error setting request for admin: ", err)
@@ -81,8 +82,8 @@ func setHeaders(req *http.Request) {
 	req.Header.Set("Api-Key", config.Args.API_KEY)
 }
 
-func getOrigins() (string, error) {
-	var data ResponseData
+func GetOrigins() (string, error) {
+	var data entity.ResponseData
 
 	req, err := http.NewRequest("GET", config.Args.ORIGIN_URL, nil)
 	if err != nil {

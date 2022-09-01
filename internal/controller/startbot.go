@@ -1,9 +1,7 @@
-package utils
+package controller
 
 import (
 	"context"
-	"net/http"
-	"strconv"
 	"time"
 
 	"telegram/config"
@@ -13,19 +11,7 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-var (
-	UserStates    = make(map[int64]map[string]int) // map['chatID'] = map'btnAddOrigin' = 'message.ID'
-	BackendClient = &http.Client{Timeout: 10 * time.Second}
-	Bot           = &tb.Bot{}
-)
-
-type Recipient struct {
-	ID int
-}
-
-func (user Recipient) Recipient() string {
-	return strconv.Itoa(user.ID)
-}
+var Bot = &tb.Bot{}
 
 func StartTelegramBot(ctx context.Context) {
 	settings := tb.Settings{
