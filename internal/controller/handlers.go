@@ -12,12 +12,12 @@ import (
 var (
 	Menu           = &tb.ReplyMarkup{ResizeReplyKeyboard: true}
 	MenuIn         = &tb.ReplyMarkup{}
-	BtnNewUser     = Menu.Text("Добавить нового пользователя")
-	BtnNewOrigin   = Menu.Text("Подключить новый сервис")
-	BtnMyId        = Menu.Text("Мой ID")
-	BtnShowOrigins = MenuIn.Data("Подключенные сервисы", "origins")
-	BtnAddOrigin   = MenuIn.Data("Добавить новый", "newOrigin")
-	BtnAddUser     = MenuIn.Data("Добавить нового", "newUser")
+	BtnNewUser     = Menu.Text(entity.TextNewUserBtn)
+	BtnNewOrigin   = Menu.Text(entity.TextNewOriginBtn)
+	BtnMyId        = Menu.Text(entity.TextMyID)
+	BtnShowOrigins = MenuIn.Data(entity.TextCurrentOriginsBtn, "origins")
+	BtnAddOrigin   = MenuIn.Data(entity.TextAddOriginBtn, "newOrigin")
+	BtnAddUser     = MenuIn.Data(entity.TextAddUserBtn, "newUser")
 )
 
 func OnStart() func(*tb.Message) {
@@ -65,7 +65,7 @@ func AddOrigin() func(*tb.Callback) {
 
 		utils.AddUserState(c.Message.Chat.ID, "btnAddOrigin", c.Message.ID+2)
 
-		Bot.Send(c.Sender, "Введите хост нового сервиса:")
+		Bot.Send(c.Sender, entity.TextSendHostMsg)
 		Bot.Respond(c, &tb.CallbackResponse{})
 	}
 }
@@ -123,7 +123,7 @@ func AddUser() func(*tb.Callback) {
 
 		utils.AddUserState(c.Message.Chat.ID, "btnAddUser", c.Message.ID+2)
 
-		Bot.Send(c.Sender, "Введите почту нового пользователя:")
+		Bot.Send(c.Sender, entity.TextSendEmailMsg)
 		Bot.Respond(c, &tb.CallbackResponse{})
 	}
 }
