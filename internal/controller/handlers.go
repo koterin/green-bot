@@ -145,18 +145,21 @@ func OnText() func(*tb.Message) {
 				switch state {
 				case entity.StateAddOrigin:
 					msg = utils.ValidateOrigin(m.Text)
+
+					MenuIn.Inline(
+						MenuIn.Row(BtnShowOrigins, BtnAddOrigin),
+					)
+					Bot.Send(m.Chat, msg, MenuIn)
 				case entity.StateAddUserEmail:
 					msg = "StateAddUserEmail"
 				case entity.StateAddUserHost:
 					msg = "StateAddUserHost"
 				}
 
-				Bot.Send(m.Chat, msg)
+				Bot.Send(m.Chat, msg, Menu)
 
 				return
 			}
 		}
-
-		log.Debug("i don't need this message")
 	}
 }

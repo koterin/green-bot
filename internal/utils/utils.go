@@ -36,7 +36,9 @@ func GetId(m *tb.Message) (entity.Recipient, string) {
 }
 
 func IsAdmin(chatId int) error {
-	req, err := setAdminRequest(chatId)
+	req, err := setRequest(map[string]string{
+		"chat-id": fmt.Sprintf("%d", chatId),
+	}, config.Args.AUTH_URL)
 	if err != nil {
 		log.Error("Error setting request for admin: ", err)
 
@@ -57,17 +59,15 @@ func IsAdmin(chatId int) error {
 	return nil
 }
 
-func setAdminRequest(chatId int) (http.Request, error) {
-	body, err := json.Marshal(map[string]string{
-		"chat-id": fmt.Sprintf("%d", chatId),
-	})
+func setRequest(payload map[string]string, url string) (http.Request, error) {
+	body, err := json.Marshal(payload)
 	if err != nil {
 		return http.Request{}, fmt.Errorf("Error creating json body: %w", err)
 	}
 
 	responseBody := bytes.NewReader(body)
 
-	req, err := http.NewRequest("POST", config.Args.AUTH_URL, responseBody)
+	req, err := http.NewRequest("POST", url, responseBody)
 	if err != nil {
 		return http.Request{}, fmt.Errorf("Error creating request to Backend: %w", err)
 	}
@@ -103,17 +103,26 @@ func GetOrigins() (string, error) {
 		return "", fmt.Errorf("\nError in response from GET /origins")
 	}
 
-	body, err := io.ReadAll(resp.Body)
+	err = readJson(resp.Body, &data)
 	if err != nil {
-		return "", fmt.Errorf("\nError reading response from GET /origins")
-	}
-
-	err = json.Unmarshal([]byte(body), &data)
-	if err != nil {
-		return "", fmt.Errorf("\nError unmarshalling response JSON %w", err)
+		return "", fmt.Errorf("\nError in readJson: %w", err)
 	}
 
 	return data.Origins, err
+}
+
+func readJson(resp io.ReadCloser, data *entity.ResponseData) error {
+	body, err := io.ReadAll(resp)
+	if err != nil {
+		return fmt.Errorf("\nError reading response from GET /origins")
+	}
+
+	err = json.Unmarshal([]byte(body), data)
+	if err != nil {
+		return fmt.Errorf("\nError unmarshalling response JSON %w", err)
+	}
+
+	return err
 }
 
 func AddUserState(chatID int64, state string, msgID int) {
@@ -127,5 +136,35 @@ func AddUserState(chatID int64, state string, msgID int) {
 }
 
 func ValidateOrigin(origin string) string {
-	return (origin + " accepted")
+	var data entity.ResponseData
+
+	req, err := setRequest(map[string]string{
+		"origin": origin,
+	}, config.Args.NEW_ORIGIN_URL)
+	if err != nil {
+		log.Error("Error setting request for .ValidateOrigin: ", err)
+
+		return entity.TextInternalError
+	}
+
+	resp, err := BackendClient.Do(&req)
+	if err != nil {
+		log.Error("Error creating new Origin: ", err)
+
+		return entity.TextInternalError
+	}
+
+	if resp.StatusCode == http.StatusInternalServerError ||
+		resp.StatusCode == http.StatusBadRequest {
+		return entity.TextInternalError
+	}
+
+	err = readJson(resp.Body, &data)
+	if err != nil {
+		log.Error("Error in .ValidateOrigin: ", err)
+
+		return entity.TextInternalError
+	}
+
+	return data.Response
 }
