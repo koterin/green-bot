@@ -147,7 +147,8 @@ func OnText() func(*tb.Message) {
 					msg = utils.ValidateOrigin(m.Text)
 
 					MenuIn.Inline(
-						MenuIn.Row(BtnShowOrigins, BtnAddOrigin),
+						MenuIn.Row(BtnShowOrigins),
+						MenuIn.Row(BtnAddOrigin),
 					)
 					Bot.Send(m.Chat, msg, MenuIn)
 				case entity.StateAddUserEmail:
@@ -156,13 +157,12 @@ func OnText() func(*tb.Message) {
 				case entity.StateAddUserHost:
 					msg = "StateAddUserHost"
 					Bot.Send(m.Chat, msg)
-				default:
-					msg = entity.TextUnknownMsg
-					Bot.Send(m.Chat, msg)
 				}
 
 				return
 			}
+
+			Bot.Send(m.Chat, entity.TextUnknownMsg)
 		}
 	}
 }
