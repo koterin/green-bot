@@ -6,7 +6,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	tb "gopkg.in/tucnak/telebot.v2"
+	tb "gopkg.in/telebot.v3"
 )
 
 func NewOrigin() func(*tb.Message) {
@@ -27,7 +27,7 @@ func ShowOrigins() func(*tb.Callback) {
 
 		origins, err := utils.GetOrigins()
 		if err != nil {
-			log.Info(err)
+			log.Error(err)
 			Bot.Send(c.Sender, entity.TextInternalError)
 
 			return

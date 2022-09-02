@@ -6,11 +6,11 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	tb "gopkg.in/tucnak/telebot.v2"
+	tb "gopkg.in/telebot.v3"
 )
 
 var (
-	Menu             = &tb.ReplyMarkup{ResizeReplyKeyboard: true}
+	Menu             = &tb.ReplyMarkup{ResizeKeyboard: true}
 	MenuIn           = &tb.ReplyMarkup{}
 	BtnNewUser       = Menu.Text(entity.TextNewUserBtn)
 	BtnNewOrigin     = Menu.Text(entity.TextNewOriginBtn)
@@ -21,9 +21,9 @@ var (
 	BtnAddUser       = MenuIn.Data(entity.TextAddUserBtn, "newUser")
 )
 
-func OnStart() func(*tb.Message) {
-	return func(m *tb.Message) {
-		userChat, message := utils.GetId(m)
+func OnStart() tb.HandlerFunc {
+	return func(c tb.Context) error {
+		userChat, message := utils.GetId(c.Message())
 
 		if message != "" {
 			if err := utils.IsAdmin(userChat.ID); err != nil {
@@ -32,7 +32,7 @@ func OnStart() func(*tb.Message) {
 					Menu.Row(BtnMyId),
 				)
 			} else {
-				log.Info("Admin user signed in: ", m.Sender.Username)
+				log.Info("Admin user signed in: ", c.Sender().Username)
 
 				Menu.Reply(
 					Menu.Row(BtnMyId),
@@ -41,9 +41,9 @@ func OnStart() func(*tb.Message) {
 					Menu.Row(BtnNewPermission),
 				)
 			}
-
-			Bot.Send(userChat, message, Menu)
 		}
+
+		return c.Send(message, Menu)
 	}
 }
 
@@ -83,11 +83,5 @@ func OnText() func(*tb.Message) {
 		}
 
 		Bot.Send(m.Chat, entity.TextUnknownMsg)
-	}
-}
-
-func OnQuery() func(*tb.Message) {
-	return func(m *tb.Message) {
-		Bot.Send(m.Chat, "I got query")
 	}
 }

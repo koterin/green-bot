@@ -12,7 +12,7 @@ import (
 	"telegram/internal/entity"
 
 	log "github.com/sirupsen/logrus"
-	tb "gopkg.in/tucnak/telebot.v2"
+	tb "gopkg.in/telebot.v3"
 )
 
 var (

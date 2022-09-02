@@ -8,7 +8,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	tb "gopkg.in/tucnak/telebot.v2"
+	tb "gopkg.in/telebot.v3"
 )
 
 var Bot = &tb.Bot{}
@@ -24,8 +24,8 @@ func StartTelegramBot(ctx context.Context) {
 	Bot, _ = tb.NewBot(settings)
 
 	Bot.Handle("/start", OnStart())
-	Bot.Handle(tb.OnText, OnText())
-	Bot.Handle(tb.OnQuery, OnQuery())
+	/*Bot.Handle(tb.OnText, OnText())
+	// Bot.Handle(tb.OnQuery)
 
 	// Buttons
 	Bot.Handle(&BtnMyId, ShowMyId())
@@ -37,7 +37,7 @@ func StartTelegramBot(ctx context.Context) {
 	Bot.Handle(&BtnShowOrigins, ShowOrigins())
 	Bot.Handle(&BtnAddOrigin, AddOrigin())
 	Bot.Handle(&BtnAddUser, AddUser())
-
+	*/
 	go func() {
 		Bot.Start()
 	}()
