@@ -10,9 +10,6 @@ services:
     restart: unless-stopped
     environment:
     - TG_BOT_KEY=${TG_BOT_KEY}
-    - AUTH_URL=${BACKEND_URL} + "/api/check-admin"
-    - ORIGIN_URL=${ORIGIN_URL} + "/api/origins"
-    - NEW_ORIGIN_URL=${NEW_ORIGIN_URL} + "/api/origin"
-    - NEW_USER_URL=${NEW_USER_URL} + "/api/user"
+    - BACKEND_URL=${BACKEND_URL}
     - API_KEY=${API_KEY}
     - LOG_LEVEL=DEBUG

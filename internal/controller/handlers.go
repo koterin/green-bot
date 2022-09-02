@@ -152,11 +152,14 @@ func OnText() func(*tb.Message) {
 					Bot.Send(m.Chat, msg, MenuIn)
 				case entity.StateAddUserEmail:
 					msg = "StateAddUserEmail"
+					Bot.Send(m.Chat, msg)
 				case entity.StateAddUserHost:
 					msg = "StateAddUserHost"
+					Bot.Send(m.Chat, msg)
+				default:
+					msg = entity.TextUnknownMsg
+					Bot.Send(m.Chat, msg)
 				}
-
-				Bot.Send(m.Chat, msg, Menu)
 
 				return
 			}
