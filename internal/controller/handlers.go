@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	Menu             = &tb.ReplyMarkup{ResizeKeyboard: true}
+	Menu             = &tb.ReplyMarkup{}
 	MenuIn           = &tb.ReplyMarkup{}
 	BtnNewUser       = Menu.Text(entity.TextNewUserBtn)
 	BtnNewOrigin     = Menu.Text(entity.TextNewOriginBtn)

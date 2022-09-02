@@ -8,8 +8,8 @@ import (
 	tb "gopkg.in/telebot.v3"
 )
 
-func NewPermission() func(*tb.Message) {
-	return func(m *tb.Message) {
+func NewPermission() tb.HandlerFunc {
+	return func(c tb.Context) error {
 		log.Info("BtnNewPermission clicked")
 
 		var users []string
@@ -24,6 +24,6 @@ func NewPermission() func(*tb.Message) {
 			MenuIn.Row(MenuIn.Data(users[1], users[1])),
 		)
 
-		Bot.Send(m.Chat, entity.TextChooseUserMsg, MenuIn)
+		return c.Send(entity.TextChooseUserMsg, MenuIn)
 	}
 }

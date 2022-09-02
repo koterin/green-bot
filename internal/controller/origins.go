@@ -9,15 +9,15 @@ import (
 	tb "gopkg.in/telebot.v3"
 )
 
-func NewOrigin() func(*tb.Message) {
-	return func(m *tb.Message) {
+func NewOrigin() tb.HandlerFunc {
+	return func(c tb.Context) error {
 		log.Info("BtnNewOrigin clicked")
 
 		MenuIn.Inline(
 			MenuIn.Row(BtnShowOrigins, BtnAddOrigin),
 		)
 
-		Bot.Send(m.Chat, entity.TextAddOrigin, MenuIn)
+		return c.Send(entity.TextAddOrigin, MenuIn)
 	}
 }
 
