@@ -9,15 +9,17 @@ import (
 	tb "gopkg.in/telebot.v3"
 )
 
-func ShowMyId() func(*tb.Message) {
-	return func(m *tb.Message) {
+func ShowMyId() tb.HandlerFunc {
+	return func(c tb.Context) error {
 		log.Info("BtnMyId clicked")
 
-		userChat, message := utils.GetId(m)
+		_, message := utils.GetId(c.Message())
 
 		if message != "" {
-			Bot.Send(userChat, message)
+			return c.Send(message)
 		}
+
+		return nil
 	}
 }
 

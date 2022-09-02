@@ -26,10 +26,10 @@ func StartTelegramBot(ctx context.Context) {
 	Bot.Handle("/start", OnStart())
 	/*Bot.Handle(tb.OnText, OnText())
 	// Bot.Handle(tb.OnQuery)
-
+	*/
 	// Buttons
 	Bot.Handle(&BtnMyId, ShowMyId())
-	Bot.Handle(&BtnNewUser, NewUser())
+	/*Bot.Handle(&BtnNewUser, NewUser())
 	Bot.Handle(&BtnNewOrigin, NewOrigin())
 	Bot.Handle(&BtnNewPermission, NewPermission())
 
