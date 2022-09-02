@@ -24,9 +24,9 @@ func StartTelegramBot(ctx context.Context) {
 	Bot, _ = tb.NewBot(settings)
 
 	Bot.Handle("/start", OnStart())
-	/*Bot.Handle(tb.OnText, OnText())
-	// Bot.Handle(tb.OnQuery)
-	*/
+	Bot.Handle(tb.OnText, OnText())
+	Bot.Handle(tb.OnQuery, OnQuery())
+
 	// Buttons
 	Bot.Handle(&BtnMyId, ShowMyId())
 	Bot.Handle(&BtnNewUser, NewUser())
@@ -34,10 +34,10 @@ func StartTelegramBot(ctx context.Context) {
 	Bot.Handle(&BtnNewPermission, NewPermission())
 
 	// Inline Buttons
-	/*Bot.Handle(&BtnShowOrigins, ShowOrigins())
+	Bot.Handle(&BtnShowOrigins, ShowOrigins())
 	Bot.Handle(&BtnAddOrigin, AddOrigin())
 	Bot.Handle(&BtnAddUser, AddUser())
-	*/
+
 	go func() {
 		Bot.Start()
 	}()

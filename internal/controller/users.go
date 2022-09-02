@@ -35,13 +35,14 @@ func NewUser() tb.HandlerFunc {
 	}
 }
 
-func AddUser() func(*tb.Callback) {
-	return func(c *tb.Callback) {
+func AddUser() tb.HandlerFunc {
+	return func(c tb.Context) error {
 		log.Info("BtnAddUser clicked")
 
-		utils.AddUserState(c.Message.Chat.ID, entity.StateAddUserEmail, c.Message.ID+2)
+		utils.AddUserState(c.Chat().ID, entity.StateAddUserEmail, c.Message().ID+2)
 
-		Bot.Send(c.Sender, entity.TextSendEmailMsg)
-		Bot.Respond(c, &tb.CallbackResponse{})
+		c.Send(entity.TextSendEmailMsg)
+
+		return c.Respond()
 	}
 }

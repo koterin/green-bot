@@ -21,34 +21,37 @@ func NewOrigin() tb.HandlerFunc {
 	}
 }
 
-func ShowOrigins() func(*tb.Callback) {
-	return func(c *tb.Callback) {
+func ShowOrigins() tb.HandlerFunc {
+	return func(c tb.Context) error {
 		log.Info("BtnShowOrigins clicked")
 
 		origins, err := utils.GetOrigins()
 		if err != nil {
 			log.Error(err)
-			Bot.Send(c.Sender, entity.TextInternalError)
 
-			return
+			c.Send(entity.TextInternalError)
+
+			return c.Respond()
 		}
 
 		MenuIn.Inline(
 			MenuIn.Row(BtnShowOrigins, BtnAddOrigin),
 		)
 
-		Bot.Send(c.Sender, origins, MenuIn)
-		Bot.Respond(c, &tb.CallbackResponse{})
+		c.Send(origins, MenuIn)
+
+		return c.Respond()
 	}
 }
 
-func AddOrigin() func(*tb.Callback) {
-	return func(c *tb.Callback) {
+func AddOrigin() tb.HandlerFunc {
+	return func(c tb.Context) error {
 		log.Info("BtnAddOrigin clicked")
 
-		utils.AddUserState(c.Message.Chat.ID, entity.StateAddOrigin, c.Message.ID+2)
+		utils.AddUserState(c.Chat().ID, entity.StateAddOrigin, c.Message().ID+2)
 
-		Bot.Send(c.Sender, entity.TextSendHostMsg)
-		Bot.Respond(c, &tb.CallbackResponse{})
+		c.Send(entity.TextSendHostMsg)
+
+		return c.Respond()
 	}
 }

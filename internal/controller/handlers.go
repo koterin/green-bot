@@ -47,41 +47,48 @@ func OnStart() tb.HandlerFunc {
 	}
 }
 
-func OnText() func(*tb.Message) {
-	return func(m *tb.Message) {
+func OnText() tb.HandlerFunc {
+	return func(c tb.Context) error {
 		var (
 			state string
 			msgID int
 			msg   string
 		)
 
-		if _, userExist := utils.UserStates[m.Chat.ID]; !userExist {
-			utils.UserStates[m.Chat.ID] = make(map[string]int)
+		if _, userExist := utils.UserStates[c.Chat().ID]; !userExist {
+			utils.UserStates[c.Chat().ID] = make(map[string]int)
 		}
 
-		for state, msgID = range utils.UserStates[m.Chat.ID] {
-			if msgID == m.ID {
+		for state, msgID = range utils.UserStates[c.Chat().ID] {
+			if msgID == c.Message().ID {
 				switch state {
 				case entity.StateAddOrigin:
-					msg = utils.ValidateOrigin(m.Text)
+					msg = utils.ValidateOrigin(c.Message().Text)
 
 					MenuIn.Inline(
 						MenuIn.Row(BtnShowOrigins),
 						MenuIn.Row(BtnAddOrigin),
 					)
-					Bot.Send(m.Chat, msg, MenuIn)
+
+					return c.Send(msg, MenuIn)
 				case entity.StateAddUserEmail:
 					msg = "StateAddUserEmail"
-					Bot.Send(m.Chat, msg)
+					return c.Send(msg)
 				case entity.StateAddUserHost:
 					msg = "StateAddUserHost"
-					Bot.Send(m.Chat, msg)
+					return c.Send(msg)
 				}
-
-				return
 			}
 		}
 
-		Bot.Send(m.Chat, entity.TextUnknownMsg)
+		return c.Send(entity.TextUnknownMsg)
+	}
+}
+
+func OnQuery() tb.HandlerFunc {
+	return func(c tb.Context) error {
+		c.Send("unknown query")
+
+		return c.Respond()
 	}
 }
