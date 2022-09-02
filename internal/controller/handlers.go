@@ -10,14 +10,15 @@ import (
 )
 
 var (
-	Menu           = &tb.ReplyMarkup{ResizeReplyKeyboard: true}
-	MenuIn         = &tb.ReplyMarkup{}
-	BtnNewUser     = Menu.Text(entity.TextNewUserBtn)
-	BtnNewOrigin   = Menu.Text(entity.TextNewOriginBtn)
-	BtnMyId        = Menu.Text(entity.TextMyID)
-	BtnShowOrigins = MenuIn.Data(entity.TextCurrentOriginsBtn, "origins")
-	BtnAddOrigin   = MenuIn.Data(entity.TextAddOriginBtn, "newOrigin")
-	BtnAddUser     = MenuIn.Data(entity.TextAddUserBtn, "newUser")
+	Menu             = &tb.ReplyMarkup{ResizeReplyKeyboard: true}
+	MenuIn           = &tb.ReplyMarkup{}
+	BtnNewUser       = Menu.Text(entity.TextNewUserBtn)
+	BtnNewOrigin     = Menu.Text(entity.TextNewOriginBtn)
+	BtnNewPermission = Menu.Text(entity.TextNewPermissionBtn)
+	BtnMyId          = Menu.Text(entity.TextMyID)
+	BtnShowOrigins   = MenuIn.Data(entity.TextCurrentOriginsBtn, "origins")
+	BtnAddOrigin     = MenuIn.Data(entity.TextAddOriginBtn, "newOrigin")
+	BtnAddUser       = MenuIn.Data(entity.TextAddUserBtn, "newUser")
 )
 
 func OnStart() func(*tb.Message) {
@@ -37,94 +38,12 @@ func OnStart() func(*tb.Message) {
 					Menu.Row(BtnMyId),
 					Menu.Row(BtnNewUser),
 					Menu.Row(BtnNewOrigin),
+					Menu.Row(BtnNewPermission),
 				)
 			}
 
 			Bot.Send(userChat, message, Menu)
 		}
-	}
-}
-
-func NewOrigin() func(*tb.Message) {
-	return func(m *tb.Message) {
-		log.Info("BtnNewOrigin clicked")
-
-		MenuIn.Inline(
-			MenuIn.Row(BtnShowOrigins, BtnAddOrigin),
-		)
-
-		Bot.Send(m.Chat, entity.TextAddOrigin, MenuIn)
-	}
-}
-
-func AddOrigin() func(*tb.Callback) {
-	return func(c *tb.Callback) {
-		log.Info("BtnAddOrigin clicked")
-
-		log.Debug("message.ID: ", c.Message.ID)
-
-		utils.AddUserState(c.Message.Chat.ID, entity.StateAddOrigin, c.Message.ID+2)
-
-		Bot.Send(c.Sender, entity.TextSendHostMsg)
-		Bot.Respond(c, &tb.CallbackResponse{})
-	}
-}
-
-func ShowOrigins() func(*tb.Callback) {
-	return func(c *tb.Callback) {
-		log.Info("BtnShowOrigins clicked")
-
-		origins, err := utils.GetOrigins()
-		if err != nil {
-			log.Info(err)
-			Bot.Send(c.Sender, entity.TextInternalError)
-
-			return
-		}
-
-		MenuIn.Inline(
-			MenuIn.Row(BtnShowOrigins, BtnAddOrigin),
-		)
-
-		Bot.Send(c.Sender, origins, MenuIn)
-		Bot.Respond(c, &tb.CallbackResponse{})
-	}
-}
-
-func ShowMyId() func(*tb.Message) {
-	return func(m *tb.Message) {
-		log.Info("BtnMyId clicked")
-
-		userChat, message := utils.GetId(m)
-
-		if message != "" {
-			Bot.Send(userChat, message)
-		}
-	}
-}
-
-func NewUser() func(*tb.Message) {
-	return func(m *tb.Message) {
-		log.Info("BtnNewUser clicked")
-
-		MenuIn.Inline(
-			MenuIn.Row(BtnAddUser),
-		)
-
-		Bot.Send(m.Chat, entity.TextAddUser, MenuIn)
-	}
-}
-
-func AddUser() func(*tb.Callback) {
-	return func(c *tb.Callback) {
-		log.Info("BtnAddUser clicked")
-
-		log.Debug("message.ID: ", c.Message.ID)
-
-		utils.AddUserState(c.Message.Chat.ID, entity.StateAddUserEmail, c.Message.ID+2)
-
-		Bot.Send(c.Sender, entity.TextSendEmailMsg)
-		Bot.Respond(c, &tb.CallbackResponse{})
 	}
 }
 
@@ -163,7 +82,12 @@ func OnText() func(*tb.Message) {
 			}
 		}
 
-		log.Debug("send unknown message")
 		Bot.Send(m.Chat, entity.TextUnknownMsg)
+	}
+}
+
+func OnQuery() func(*tb.Message) {
+	return func(m *tb.Message) {
+		Bot.Send(m.Chat, "I got query")
 	}
 }
