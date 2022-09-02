@@ -13,7 +13,7 @@ func ShowMyId() tb.HandlerFunc {
 	return func(c tb.Context) error {
 		log.Info("BtnMyId clicked")
 
-		_, message := utils.GetId(c.Message())
+		message := utils.GetId(c.Message())
 
 		if message != "" {
 			return c.Send(message)
@@ -23,15 +23,15 @@ func ShowMyId() tb.HandlerFunc {
 	}
 }
 
-func NewUser() func(*tb.Message) {
-	return func(m *tb.Message) {
+func NewUser() tb.HandlerFunc {
+	return func(c tb.Context) error {
 		log.Info("BtnNewUser clicked")
 
 		MenuIn.Inline(
 			MenuIn.Row(BtnAddUser),
 		)
 
-		Bot.Send(m.Chat, entity.TextAddUser, MenuIn)
+		return c.Send(entity.TextAddUser, MenuIn)
 	}
 }
 

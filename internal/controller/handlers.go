@@ -23,10 +23,10 @@ var (
 
 func OnStart() tb.HandlerFunc {
 	return func(c tb.Context) error {
-		userChat, message := utils.GetId(c.Message())
+		message := utils.GetId(c.Message())
 
 		if message != "" {
-			if err := utils.IsAdmin(userChat.ID); err != nil {
+			if err := utils.IsAdmin(int(c.Sender().ID)); err != nil {
 				log.Info(err)
 				Menu.Reply(
 					Menu.Row(BtnMyId),

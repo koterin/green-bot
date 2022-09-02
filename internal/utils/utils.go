@@ -20,19 +20,19 @@ var (
 	UserStates    = make(map[int64]map[string]int) // map['chatID'] = map'btnAddOrigin' = 'message.ID'
 )
 
-func GetId(m *tb.Message) (entity.Recipient, string) {
+func GetId(m *tb.Message) string {
 	var userChat entity.Recipient
 
 	if !m.Private() {
 		log.Error("Error: chat is not private")
-		return entity.Recipient{}, ""
+		return ""
 	}
 
 	userChat.ID = int(m.Chat.ID)
 
 	message := "Сообщи этот ID админу для авторизации: " + userChat.Recipient()
 
-	return userChat, message
+	return message
 }
 
 func IsAdmin(chatId int) error {
