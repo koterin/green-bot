@@ -161,8 +161,9 @@ func OnText() func(*tb.Message) {
 
 				return
 			}
-
-			Bot.Send(m.Chat, entity.TextUnknownMsg)
 		}
+
+		log.Debug("send unknown message")
+		Bot.Send(m.Chat, entity.TextUnknownMsg)
 	}
 }
