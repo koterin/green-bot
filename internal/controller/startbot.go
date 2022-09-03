@@ -25,7 +25,7 @@ func StartTelegramBot(ctx context.Context) {
 
 	Bot.Handle("/start", OnStart())
 	Bot.Handle(tb.OnText, OnText())
-	Bot.Handle(tb.OnQuery, OnQuery())
+	Bot.Handle(tb.OnCallback, OnCallback())
 
 	// Buttons
 	Bot.Handle(&BtnMyId, ShowMyId())

@@ -85,9 +85,9 @@ func OnText() tb.HandlerFunc {
 	}
 }
 
-func OnQuery() tb.HandlerFunc {
+func OnCallback() tb.HandlerFunc {
 	return func(c tb.Context) error {
-		c.Send("unknown query")
+		c.Send("unhandeled callback")
 
 		return c.Respond()
 	}
