@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"strconv"
+	"strings"
 	"telegram/internal/entity"
 	"telegram/internal/utils"
 
@@ -75,9 +75,6 @@ func OnText() tb.HandlerFunc {
 				case entity.StateAddUserEmail:
 					msg = "StateAddUserEmail"
 					return c.Send(msg)
-				case entity.StateAddUserHost:
-					msg = "StateAddUserHost"
-					return c.Send(msg)
 				}
 			}
 		}
@@ -88,7 +85,39 @@ func OnText() tb.HandlerFunc {
 
 func OnCallback() tb.HandlerFunc {
 	return func(c tb.Context) error {
-		msg := "unhandeled callback" + strconv.Itoa(c.Callback().Message.ID)
+		var (
+			msg   string
+			data  string
+			state string
+			msgID int
+		)
+
+		log.Debug("messageId: ", c.Message().ID)
+
+		data = strings.TrimPrefix(c.Callback().Data, "\f")
+
+		if _, userExist := utils.UserStates[c.Chat().ID]; !userExist {
+			utils.UserStates[c.Chat().ID] = make(map[string]int)
+		}
+
+		for state, msgID = range utils.UserStates[c.Chat().ID] {
+			if msgID == c.Message().ID {
+				switch state {
+				case entity.StateAddUserHost:
+					msg = "Выбери, к какому сервису надо дать доступ пользователю " + data
+
+					if err := OriginsInlineKeyboard(MenuIn); err != nil {
+						c.Send(entity.TextInternalError)
+					}
+
+					return c.Send(msg, MenuIn)
+				case entity.StateAddUserEmail:
+					msg = "StateAddUserEmail"
+					return c.Send(msg)
+				}
+			}
+		}
+
 		c.Send(msg)
 
 		return c.Respond()

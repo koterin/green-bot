@@ -17,8 +17,7 @@ func OriginsInlineKeyboard(menu *tb.ReplyMarkup) error {
 		data entity.ResponseData
 	)
 
-	inlineKeys := make([][]tb.InlineButton, 0, 0)
-	menu.InlineKeyboard = inlineKeys
+	menu.InlineKeyboard = menu.InlineKeyboard[:0]
 
 	if err := utils.GetStruct(config.Args.ORIGIN_URL, &data); err != nil {
 		log.Error(err)
@@ -27,7 +26,11 @@ func OriginsInlineKeyboard(menu *tb.ReplyMarkup) error {
 	}
 
 	for _, host := range data.Origins {
-		btn = tb.InlineButton{Unique: host.Origin, Text: host.Origin}
+		btn = tb.InlineButton{
+			Unique: host.Origin,
+			Text:   host.Origin,
+			Data:   entity.StateAddUserHost,
+		}
 		btns = []tb.InlineButton{btn}
 		menu.InlineKeyboard = append(menu.InlineKeyboard, btns)
 	}
@@ -42,8 +45,7 @@ func UsersInlineKeyboard(menu *tb.ReplyMarkup) error {
 		data entity.ResponseData
 	)
 
-	inlineKeys := make([][]tb.InlineButton, 0, 0)
-	menu.InlineKeyboard = inlineKeys
+	menu.InlineKeyboard = menu.InlineKeyboard[:0]
 
 	if err := utils.GetStruct(config.Args.USERS_URL, &data); err != nil {
 		log.Error(err)
