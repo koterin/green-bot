@@ -3,9 +3,13 @@ package entity
 import "strconv"
 
 type ResponseData struct {
-	Status   int    `json:"status"`
-	Origins  string `json:"origins"`
-	Response string `json:"Response"`
+	Status   int     `json:"status"`
+	Response string  `json:"Response"`
+	Origins  []Origs `json:"origins,omitempty"`
+}
+
+type Origs struct {
+	Origin string `json:"origin,omitempty"`
 }
 
 type Recipient struct {

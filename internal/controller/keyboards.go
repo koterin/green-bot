@@ -1,28 +1,34 @@
 package controller
 
 import (
-	"strings"
 	"telegram/internal/utils"
+
+	log "github.com/sirupsen/logrus"
 
 	tb "gopkg.in/telebot.v3"
 )
 
-func UsersInlineKeyboard(menu *tb.ReplyMarkup) {
+func OriginsInlineKeyboard(menu *tb.ReplyMarkup) error {
 	var (
-		users []string
-		btn   tb.InlineButton
-		btns  []tb.InlineButton
+		btn  tb.InlineButton
+		btns []tb.InlineButton
 	)
-
-	origins, _ := utils.GetOrigins()
-	users = strings.Split(origins, "\n")
 
 	inlineKeys := make([][]tb.InlineButton, 0, 0)
 	menu.InlineKeyboard = inlineKeys
 
-	for _, user := range users {
-		btn = tb.InlineButton{Unique: user, Text: user}
+	origins, err := utils.GetOrigins()
+	if err != nil {
+		log.Error(err)
+
+		return err
+	}
+
+	for _, host := range origins {
+		btn = tb.InlineButton{Unique: host.Origin, Text: host.Origin}
 		btns = []tb.InlineButton{btn}
 		menu.InlineKeyboard = append(menu.InlineKeyboard, btns)
 	}
+
+	return nil
 }

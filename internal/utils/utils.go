@@ -82,12 +82,22 @@ func setHeaders(req *http.Request) {
 	req.Header.Set("Api-Key", config.Args.API_KEY)
 }
 
-func GetOrigins() (string, error) {
+func GetOriginString(origs []entity.Origs) string {
+	var hosts string
+
+	for _, host := range origs {
+		hosts += host.Origin + "\n"
+	}
+
+	return hosts
+}
+
+func GetOrigins() ([]entity.Origs, error) {
 	var data entity.ResponseData
 
 	req, err := http.NewRequest("GET", config.Args.ORIGIN_URL, nil)
 	if err != nil {
-		return "", fmt.Errorf("Error making GET /origins request: %w", err)
+		return nil, fmt.Errorf("Error making GET /origins request: %w", err)
 	}
 
 	setHeaders(req)
@@ -96,16 +106,16 @@ func GetOrigins() (string, error) {
 	if err != nil {
 		log.Error("\nError calling GET /origins: ", err)
 
-		return "", err
+		return nil, err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("\nError in response from GET /origins")
+		return nil, fmt.Errorf("\nError in response from GET /origins")
 	}
 
 	err = readJson(resp.Body, &data)
 	if err != nil {
-		return "", fmt.Errorf("\nError in readJson: %w", err)
+		return nil, fmt.Errorf("\nError in readJson: %w", err)
 	}
 
 	return data.Origins, err

@@ -34,11 +34,13 @@ func ShowOrigins() tb.HandlerFunc {
 			return c.Respond()
 		}
 
+		hosts := utils.GetOriginString(origins)
+
 		MenuIn.Inline(
 			MenuIn.Row(BtnShowOrigins, BtnAddOrigin),
 		)
 
-		c.Send(origins, MenuIn)
+		c.Send(hosts, MenuIn)
 
 		return c.Respond()
 	}

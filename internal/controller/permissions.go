@@ -12,7 +12,9 @@ func NewPermission() tb.HandlerFunc {
 	return func(c tb.Context) error {
 		log.Info("BtnNewPermission clicked")
 
-		UsersInlineKeyboard(MenuIn)
+		if err := OriginsInlineKeyboard(MenuIn); err != nil {
+			c.Send(entity.TextInternalError)
+		}
 
 		return c.Send(entity.TextChooseUserMsg, MenuIn)
 	}
