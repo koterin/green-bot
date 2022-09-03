@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"strconv"
 	"telegram/internal/entity"
 	"telegram/internal/utils"
 
@@ -87,7 +88,8 @@ func OnText() tb.HandlerFunc {
 
 func OnCallback() tb.HandlerFunc {
 	return func(c tb.Context) error {
-		c.Send("unhandeled callback")
+		msg := "unhandeled callback" + strconv.Itoa(c.Callback().Message.ID)
+		c.Send(msg)
 
 		return c.Respond()
 	}

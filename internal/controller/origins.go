@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"telegram/config"
 	"telegram/internal/entity"
 	"telegram/internal/utils"
 
@@ -23,18 +24,18 @@ func NewOrigin() tb.HandlerFunc {
 
 func ShowOrigins() tb.HandlerFunc {
 	return func(c tb.Context) error {
+		var data entity.ResponseData
+
 		log.Info("BtnShowOrigins clicked")
 
-		origins, err := utils.GetOrigins()
-		if err != nil {
+		if err := utils.GetStruct(config.Args.ORIGIN_URL, &data); err != nil {
 			log.Error(err)
-
 			c.Send(entity.TextInternalError)
 
 			return c.Respond()
 		}
 
-		hosts := utils.GetOriginString(origins)
+		hosts := utils.GetOriginString(data.Origins)
 
 		MenuIn.Inline(
 			MenuIn.Row(BtnShowOrigins, BtnAddOrigin),

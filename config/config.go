@@ -15,6 +15,7 @@ var Args struct {
 	ORIGIN_URL     string
 	NEW_ORIGIN_URL string
 	NEW_USER_URL   string
+	USERS_URL      string
 }
 
 func Validate() {
@@ -26,4 +27,5 @@ func Validate() {
 	Args.ORIGIN_URL = Args.BACKEND_URL + "/api/origins"
 	Args.NEW_ORIGIN_URL = Args.BACKEND_URL + "/api/origin"
 	Args.NEW_USER_URL = Args.BACKEND_URL + "/api/user"
+	Args.USERS_URL = Args.BACKEND_URL + "/api/users"
 }

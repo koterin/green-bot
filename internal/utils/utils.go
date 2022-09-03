@@ -92,33 +92,31 @@ func GetOriginString(origs []entity.Origs) string {
 	return hosts
 }
 
-func GetOrigins() ([]entity.Origs, error) {
-	var data entity.ResponseData
-
-	req, err := http.NewRequest("GET", config.Args.ORIGIN_URL, nil)
+func GetStruct(url string, data *entity.ResponseData) error {
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("Error making GET /origins request: %w", err)
+		return fmt.Errorf("Error making GET request to %s: %w", url, err)
 	}
 
 	setHeaders(req)
 
 	resp, err := BackendClient.Do(req)
 	if err != nil {
-		log.Error("\nError calling GET /origins: ", err)
+		log.Error("\nError calling GET ", url, ": ", err)
 
-		return nil, err
+		return err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("\nError in response from GET /origins")
+		return fmt.Errorf("\nError in response from GET %s", url)
 	}
 
-	err = readJson(resp.Body, &data)
+	err = readJson(resp.Body, data)
 	if err != nil {
-		return nil, fmt.Errorf("\nError in readJson: %w", err)
+		return fmt.Errorf("\nError in readJson from %s: %w", url, err)
 	}
 
-	return data.Origins, err
+	return err
 }
 
 func readJson(resp io.ReadCloser, data *entity.ResponseData) error {
