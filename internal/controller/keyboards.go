@@ -34,3 +34,28 @@ func OriginsInlineKeyboard(menu *tb.ReplyMarkup) error {
 
 	return nil
 }
+
+func UsersInlineKeyboard(menu *tb.ReplyMarkup) error {
+	var (
+		btn  tb.InlineButton
+		btns []tb.InlineButton
+		data entity.ResponseData
+	)
+
+	inlineKeys := make([][]tb.InlineButton, 0, 0)
+	menu.InlineKeyboard = inlineKeys
+
+	if err := utils.GetStruct(config.Args.USERS_URL, &data); err != nil {
+		log.Error(err)
+
+		return err
+	}
+
+	for _, user := range data.Users {
+		btn = tb.InlineButton{Unique: user.User, Text: user.User}
+		btns = []tb.InlineButton{btn}
+		menu.InlineKeyboard = append(menu.InlineKeyboard, btns)
+	}
+
+	return nil
+}
