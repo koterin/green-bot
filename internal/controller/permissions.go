@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"strings"
 	"telegram/internal/entity"
+	"telegram/internal/utils"
 
 	log "github.com/sirupsen/logrus"
 
@@ -12,17 +14,23 @@ func NewPermission() tb.HandlerFunc {
 	return func(c tb.Context) error {
 		log.Info("BtnNewPermission clicked")
 
-		var users []string
-		users = append(users, "user1")
-		users = append(users, "user2")
-
-		MenuIn.Inline(
-			MenuIn.Row(MenuIn.Data(users[0], users[0])),
+		var (
+			users []string
+			btn   tb.InlineButton
+			btns  []tb.InlineButton
 		)
 
-		MenuIn.Inline(
-			MenuIn.Row(MenuIn.Data(users[1], users[1])),
-		)
+		origins, _ := utils.GetOrigins()
+		users = strings.Split(origins, "\n")
+
+		for _, user := range users {
+			btn = tb.InlineButton{Unique: user, Text: user}
+			btns = []tb.InlineButton{btn}
+			MenuIn.InlineKeyboard = append(MenuIn.InlineKeyboard, btns)
+		}
+
+		log.Debug("btns: ", btns)
+		log.Debug("menu: ", MenuIn)
 
 		return c.Send(entity.TextChooseUserMsg, MenuIn)
 	}
