@@ -92,10 +92,6 @@ func OnCallback() tb.HandlerFunc {
 			msgID int
 		)
 
-		log.Debug("callback data: ", c.Callback().Data)
-		log.Debug("callback Unique: ", c.Callback().Unique)
-		log.Debug("callback text: ", c.Text())
-
 		data = strings.TrimPrefix(c.Callback().Data, "\f")
 
 		if _, userExist := utils.UserStates[c.Chat().ID]; !userExist {
@@ -107,7 +103,7 @@ func OnCallback() tb.HandlerFunc {
 				switch state {
 				case entity.StateChooseUser:
 					utils.AddPermState(c.Chat().ID, "email", data)
-					msg = "Выбери, к какому сервису надо дать доступ пользователю " + data
+					msg = entity.TextChooseOriginMsg + data
 
 					if err := OriginsInlineKeyboard(MenuIn); err != nil {
 						c.Send(entity.TextInternalError)
@@ -118,16 +114,24 @@ func OnCallback() tb.HandlerFunc {
 
 					return c.Respond()
 				case entity.StateChooseHost:
-					log.Debug("msg before statechoosehost: ", msg)
-					log.Debug("perm states: ", utils.AddPermStates[c.Chat().ID]["email"])
-					log.Debug("data: ", data)
-					msg = "Выдаем доступ пользователю " + utils.AddPermStates[c.Chat().ID]["email"] + " к сервису " + data
+					email := utils.AddPermStates[c.Chat().ID]["email"]
+
+					/*if err := utils.AddPermission(email); err != nil {
+						log.Error("Error adding permission: ", err)
+						c.Send(entity.TextInternalError)
+
+						return c.Respond()
+					}*/
+
+					msg = "Выдаем пользователю " + email + " доступ к сервису " + data
 					c.Send(msg)
 
 					return c.Respond()
 				}
 			}
 		}
+
+		c.Send(entity.TextUnknownMsg)
 
 		return c.Respond()
 	}
