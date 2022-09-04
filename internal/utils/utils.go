@@ -17,7 +17,8 @@ import (
 
 var (
 	BackendClient = &http.Client{Timeout: 10 * time.Second}
-	UserStates    = make(map[int64]map[string]int) // map['chatID'] = map'btnAddOrigin' = 'message.ID'
+	UserStates    = make(map[int64]map[string]int)    // map['chatID'] = map'btnAddOrigin' = 'message.ID'
+	AddPermStates = make(map[int64]map[string]string) // map['chatID'] = map'userEmail' = 'userEmail', map'host' = 'host'
 )
 
 func GetId(m *tb.Message) string {
@@ -139,8 +140,6 @@ func AddUserState(chatID int64, state string, msgID int) {
 	}
 
 	UserStates[chatID][state] = msgID
-
-	log.Debug("current map: ", UserStates)
 }
 
 func ValidateOrigin(origin string) string {
@@ -175,4 +174,14 @@ func ValidateOrigin(origin string) string {
 	}
 
 	return data.Response
+}
+
+func AddPermState(chatID int64, stage string, value string) {
+	if _, userExist := AddPermStates[chatID]; !userExist {
+		AddPermStates[chatID] = make(map[string]string)
+	}
+
+	AddPermStates[chatID][stage] = value
+
+	log.Debug("current AddPermStates: ", AddPermStates)
 }

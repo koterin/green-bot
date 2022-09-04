@@ -5,4 +5,6 @@ var (
 	StateAddUserHost   = "addingUserHost"
 	StateAddOrigin     = "addingOrigin"
 	StateAddPermission = "addingPermission"
+	StateChooseUser    = "choosingUser"
+	StateChooseHost    = "choosingHost"
 )

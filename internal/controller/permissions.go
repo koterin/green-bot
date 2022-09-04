@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"strconv"
 	"telegram/internal/entity"
 	"telegram/internal/utils"
 
@@ -18,8 +17,8 @@ func NewPermission() tb.HandlerFunc {
 			c.Send(entity.TextInternalError)
 		}
 
-		utils.AddUserState(c.Chat().ID, entity.StateAddUserHost, c.Message().ID+1)
+		utils.AddUserState(c.Chat().ID, entity.StateChooseUser, c.Message().ID+1)
 
-		return c.Send(entity.TextChooseUserMsg+strconv.Itoa(c.Message().ID), MenuIn)
+		return c.Send(entity.TextChooseUserMsg, MenuIn)
 	}
 }

@@ -29,7 +29,6 @@ func OriginsInlineKeyboard(menu *tb.ReplyMarkup) error {
 		btn = tb.InlineButton{
 			Unique: host.Origin,
 			Text:   host.Origin,
-			Data:   entity.StateAddUserHost,
 		}
 		btns = []tb.InlineButton{btn}
 		menu.InlineKeyboard = append(menu.InlineKeyboard, btns)
@@ -54,7 +53,10 @@ func UsersInlineKeyboard(menu *tb.ReplyMarkup) error {
 	}
 
 	for _, user := range data.Users {
-		btn = tb.InlineButton{Unique: user.User, Text: user.User}
+		btn = tb.InlineButton{
+			Unique: user.User,
+			Text:   user.User,
+		}
 		btns = []tb.InlineButton{btn}
 		menu.InlineKeyboard = append(menu.InlineKeyboard, btns)
 	}
