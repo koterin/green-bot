@@ -14,6 +14,16 @@ import (
 var Bot = &tb.Bot{}
 
 func StartTelegramBot(ctx context.Context) {
+	config.Validate()
+
+	level, err := log.ParseLevel(config.Args.LOG_LEVEL)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//log.SetFormatter(&log.JSONFormatter{})
+	log.SetLevel(level)
+
 	settings := tb.Settings{
 		Token: config.Args.TG_BOT_KEY,
 		Poller: &tb.LongPoller{
