@@ -19,6 +19,7 @@ var (
 	BackendClient = &http.Client{Timeout: 10 * time.Second}
 	UserStates    = make(map[int64]map[string]int)    // map['chatID'] = map'btnAddOrigin' = 'message.ID'
 	AddPermStates = make(map[int64]map[string]string) // map['chatID'] = map'userEmail' = 'userEmail', map'host' = 'host'
+	NewUserStates = make(map[int64]map[string]string) // map['chatID'] = map'email' = 'userEmail', map'chatID' = 'ID'
 )
 
 func GetId(m *tb.Message) string {
@@ -182,8 +183,16 @@ func AddPermState(chatID int64, stage string, value string) {
 	}
 
 	AddPermStates[chatID][stage] = value
+}
 
-	log.Debug("current AddPermStates: ", AddPermStates)
+func AddNewUserState(chatID int64, param string, value string) {
+	if _, userExist := NewUserStates[chatID]; !userExist {
+		NewUserStates[chatID] = make(map[string]string)
+	}
+
+	NewUserStates[chatID][param] = value
+
+	log.Debug("current NewUserStates: ", NewUserStates)
 }
 
 func AddPermission(email string, origin string) (int, error) {
@@ -193,6 +202,27 @@ func AddPermission(email string, origin string) (int, error) {
 	}, config.Args.ADD_PERMISSION_URL)
 	if err != nil {
 		log.Error("Error setting request for .AddPermission: ", err)
+
+		return 0, err
+	}
+
+	resp, err := BackendClient.Do(&req)
+	if err != nil {
+		log.Error("Error sending request from .AddPermission to Backend: ", err)
+
+		return 0, err
+	}
+
+	return resp.StatusCode, nil
+}
+
+func NewUserToBackend(email string, chatID string) (int, error) {
+	req, err := setRequest(map[string]string{
+		"email":   fmt.Sprintf("%s", email),
+		"chat-id": fmt.Sprintf("%s", chatID),
+	}, config.Args.NEW_USER_URL)
+	if err != nil {
+		log.Error("Error setting request for .NewUserToBackend: ", err)
 
 		return 0, err
 	}

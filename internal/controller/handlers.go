@@ -74,7 +74,30 @@ func OnText() tb.HandlerFunc {
 
 					return c.Send(msg, MenuIn)
 				case entity.StateAddUserEmail:
-					msg = "StateAddUserEmail"
+					utils.AddNewUserState(c.Chat().ID, "email", c.Message().Text)
+					utils.AddUserState(c.Chat().ID, entity.StateAddUserChatID, c.Message().ID+2)
+					msg = entity.TextSendChatIDMsg
+
+					return c.Send(msg)
+				case entity.StateAddUserChatID:
+					email := utils.NewUserStates[c.Chat().ID]["email"]
+
+					status, err := utils.NewUserToBackend(email, c.Message().Text)
+					if err != nil {
+						return c.Send(entity.TextInternalError)
+					}
+
+					delete(utils.NewUserStates[c.Chat().ID], "email")
+
+					msg = entity.TextInternalError
+					if status == http.StatusCreated {
+						msg = "Пользователь " + email + " успешно добавлен"
+					}
+
+					if status == http.StatusConflict {
+						msg = "Пользователь " + email + " уже существует"
+					}
+
 					return c.Send(msg)
 				}
 			}

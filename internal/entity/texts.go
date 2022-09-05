@@ -15,7 +15,8 @@ var (
 	TextAddUserBtn        = "Добавить нового"
 	TextChooseUserMsg     = "Выбери пользователя, которому надо выдать доступ:"
 	TextChooseOriginMsg   = "Выбери, к какому сервису надо дать доступ пользователю "
-	TextSendHostMsg       = "Введите хост нового сервиса:"
-	TextSendEmailMsg      = "Введите почту нового пользователя:"
+	TextSendHostMsg       = "Введи хост нового сервиса:"
+	TextSendEmailMsg      = "Введи почту нового пользователя:"
+	TextSendChatIDMsg     = "Введи chatID нового пользователя:"
 	TextUnknownMsg        = "Если это было мне, то я не понял. Лучше зайди в меню и нажми на нужную кнопку еще раз"
 )
