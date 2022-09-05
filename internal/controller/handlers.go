@@ -161,7 +161,9 @@ func AddingOrigin(c tb.Context) error {
 		return c.Send(entity.TextSpacesNotAllowed, MenuIn)
 	}
 
-	msg := utils.AddOriginToBackend(c.Message().Text)
+	data := strings.ToLower(c.Message().Text)
+
+	msg := utils.AddOriginToBackend(data)
 
 	return c.Send(msg, MenuIn)
 }
@@ -175,7 +177,9 @@ func InsertingEmail(c tb.Context) error {
 		return c.Send(entity.TextSpacesNotAllowed, MenuIn)
 	}
 
-	utils.AddNewUserState(c.Chat().ID, "email", c.Message().Text)
+	data := strings.ToLower(c.Message().Text)
+
+	utils.AddNewUserState(c.Chat().ID, "email", data)
 	utils.AddUserState(c.Chat().ID, entity.StateAddUserChatID, c.Message().ID+2)
 
 	msg := entity.TextSendChatIDMsg
@@ -203,7 +207,7 @@ func InsertingChatID(c tb.Context) error {
 
 	msg := entity.TextInternalError
 	if status == http.StatusCreated {
-		msg = "Пользователь " + email + " успешно добавлен"
+		msg = "Пользователь " + email + " успешно добавлен. Можно проверять :)"
 	}
 
 	if status == http.StatusConflict {
