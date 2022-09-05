@@ -19,6 +19,7 @@ var (
 	BtnNewPermission = Menu.Text(entity.TextNewPermissionBtn)
 	BtnMyId          = Menu.Text(entity.TextMyID)
 	BtnShowOrigins   = MenuIn.Data(entity.TextCurrentOriginsBtn, "origins")
+	BtnShowUsers     = Menu.Data(entity.TextShowUsersBtn, "users")
 	BtnAddOrigin     = MenuIn.Data(entity.TextAddOriginBtn, "newOrigin")
 	BtnAddUser       = MenuIn.Data(entity.TextAddUserBtn, "newUser")
 )
@@ -68,8 +69,7 @@ func OnText() tb.HandlerFunc {
 					msg = utils.ValidateOrigin(c.Message().Text)
 
 					MenuIn.Inline(
-						MenuIn.Row(BtnShowOrigins),
-						MenuIn.Row(BtnAddOrigin),
+						MenuIn.Row(BtnShowOrigins, BtnAddOrigin),
 					)
 
 					return c.Send(msg, MenuIn)
@@ -98,7 +98,11 @@ func OnText() tb.HandlerFunc {
 						msg = "Пользователь " + email + " уже существует"
 					}
 
-					return c.Send(msg)
+					MenuIn.Inline(
+						MenuIn.Row(BtnShowUsers, BtnAddUser),
+					)
+
+					return c.Send(msg, MenuIn)
 				}
 			}
 		}

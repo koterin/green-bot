@@ -13,6 +13,7 @@ var (
 	TextCurrentOriginsBtn = "Подключенные сервисы"
 	TextAddOriginBtn      = "Добавить новый"
 	TextAddUserBtn        = "Добавить нового"
+	TextShowUsersBtn      = "Текущие пользователи"
 	TextChooseUserMsg     = "Выбери пользователя, которому надо выдать доступ:"
 	TextChooseOriginMsg   = "Выбери, к какому сервису надо дать доступ пользователю "
 	TextSendHostMsg       = "Введи хост нового сервиса:"

@@ -36,6 +36,7 @@ func StartTelegramBot(ctx context.Context) {
 	// Inline Buttons
 	Bot.Handle(&BtnShowOrigins, ShowOrigins())
 	Bot.Handle(&BtnAddOrigin, AddOrigin())
+	Bot.Handle(&BtnShowUsers, ShowUsers())
 	Bot.Handle(&BtnAddUser, AddUser())
 
 	go func() {

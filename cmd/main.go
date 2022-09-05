@@ -11,6 +11,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Main func simplify
+// Create app func
+// Simplify ontext handler
+// create struct for json bodies
+// add show users btn
+// Interface for GetOriginString
+
 func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"telegram/config"
 	"telegram/internal/entity"
 	"telegram/internal/utils"
 
@@ -28,7 +29,7 @@ func NewUser() tb.HandlerFunc {
 		log.Info("BtnNewUser clicked")
 
 		MenuIn.Inline(
-			MenuIn.Row(BtnAddUser),
+			MenuIn.Row(BtnShowUsers, BtnAddUser),
 		)
 
 		return c.Send(entity.TextAddUser, MenuIn)
@@ -42,6 +43,31 @@ func AddUser() tb.HandlerFunc {
 		utils.AddUserState(c.Chat().ID, entity.StateAddUserEmail, c.Message().ID+2)
 
 		c.Send(entity.TextSendEmailMsg)
+
+		return c.Respond()
+	}
+}
+
+func ShowUsers() tb.HandlerFunc {
+	return func(c tb.Context) error {
+		var data entity.ResponseData
+
+		log.Info("BtnShowUsers clicked")
+
+		if err := utils.GetStruct(config.Args.USERS_URL, &data); err != nil {
+			log.Error(err)
+			c.Send(entity.TextInternalError)
+
+			return c.Respond()
+		}
+
+		users := utils.GetUserString(data.Users)
+
+		MenuIn.Inline(
+			MenuIn.Row(BtnShowUsers, BtnAddUser),
+		)
+
+		c.Send(users, MenuIn)
 
 		return c.Respond()
 	}

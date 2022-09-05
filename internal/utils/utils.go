@@ -94,6 +94,16 @@ func GetOriginString(origs []entity.Origs) string {
 	return hosts
 }
 
+func GetUserString(users []entity.User) string {
+	var u string
+
+	for _, user := range users {
+		u += user.User + "\n"
+	}
+
+	return u
+}
+
 func GetStruct(url string, data *entity.ResponseData) error {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
