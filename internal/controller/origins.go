@@ -12,7 +12,7 @@ import (
 
 func NewOrigin() tb.HandlerFunc {
 	return func(c tb.Context) error {
-		log.Info("BtnNewOrigin clicked")
+		log.Info("BtnNewOrigin clicked by ", c.Sender().Username)
 
 		MenuIn.Inline(
 			MenuIn.Row(BtnShowOrigins, BtnAddOrigin),
@@ -26,7 +26,7 @@ func ShowOrigins() tb.HandlerFunc {
 	return func(c tb.Context) error {
 		var data entity.ResponseData
 
-		log.Info("BtnShowOrigins clicked")
+		log.Info("BtnShowOrigins clicked by ", c.Sender().Username)
 
 		if err := utils.GetStruct(config.Args.ORIGIN_URL, &data); err != nil {
 			log.Error(err)
@@ -49,7 +49,7 @@ func ShowOrigins() tb.HandlerFunc {
 
 func AddOrigin() tb.HandlerFunc {
 	return func(c tb.Context) error {
-		log.Info("BtnAddOrigin clicked")
+		log.Info("BtnAddOrigin clicked by ", c.Sender().Username)
 
 		utils.AddUserState(c.Chat().ID, entity.StateAddOrigin, c.Message().ID+2)
 

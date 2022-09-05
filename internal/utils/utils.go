@@ -154,7 +154,7 @@ func AddUserState(chatID int64, state string, msgID int) {
 	UserStates[chatID][state] = msgID
 }
 
-func AddOriginToBackend(origin string) string {
+func AddOriginToBackend(origin string) (string, error) {
 	var data entity.ResponseData
 
 	req, err := setRequest(entity.Payload{
@@ -163,29 +163,31 @@ func AddOriginToBackend(origin string) string {
 	if err != nil {
 		log.Error("Error setting request for .ValidateOrigin: ", err)
 
-		return entity.TextInternalError
+		return entity.TextInternalError, err
 	}
 
 	resp, err := BackendClient.Do(&req)
 	if err != nil {
 		log.Error("Error creating new Origin: ", err)
 
-		return entity.TextInternalError
+		return entity.TextInternalError, err
 	}
 
 	if resp.StatusCode == http.StatusInternalServerError ||
 		resp.StatusCode == http.StatusBadRequest {
-		return entity.TextInternalError
+		return entity.TextInternalError,
+			fmt.Errorf("Error: received error status code from backend: %d",
+				resp.StatusCode)
 	}
 
 	err = readJson(resp.Body, &data)
 	if err != nil {
 		log.Error("Error in .ValidateOrigin: ", err)
 
-		return entity.TextInternalError
+		return entity.TextInternalError, err
 	}
 
-	return data.Response
+	return data.Response, err
 }
 
 func AddPermState(chatID int64, stage string, value string) {

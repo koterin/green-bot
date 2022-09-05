@@ -141,6 +141,7 @@ func ChoosingHost(c tb.Context, data string) error {
 
 	if status == http.StatusCreated {
 		msg = "Выдали пользователю " + email + " доступ к сервису " + data
+		log.Info("User ", c.Sender().Username, " added permission for ", email, " to ", data)
 
 		delete(utils.AddPermStates[c.Chat().ID], "email")
 	}
@@ -161,7 +162,10 @@ func AddingOrigin(c tb.Context) error {
 
 	data := strings.ToLower(c.Message().Text)
 
-	msg := utils.AddOriginToBackend(data)
+	msg, err := utils.AddOriginToBackend(data)
+	if err == nil {
+		log.Info("User ", c.Sender().Username, " added origin ", data)
+	}
 
 	return c.Send(msg, MenuIn)
 }
@@ -204,7 +208,9 @@ func InsertingChatID(c tb.Context) error {
 	delete(utils.NewUserStates[c.Chat().ID], "email")
 
 	msg := entity.TextInternalError
+
 	if status == http.StatusCreated {
+		log.Info("New user ", email, " was added by ", c.Sender().Username)
 		msg = "Пользователь " + email + " успешно добавлен. Можно проверять :)"
 	}
 

@@ -12,7 +12,7 @@ import (
 
 func ShowMyId() tb.HandlerFunc {
 	return func(c tb.Context) error {
-		log.Info("BtnMyId clicked")
+		log.Info("BtnMyId clicked by ", c.Sender().Username)
 
 		message := utils.GetId(c.Message())
 
@@ -26,7 +26,7 @@ func ShowMyId() tb.HandlerFunc {
 
 func NewUser() tb.HandlerFunc {
 	return func(c tb.Context) error {
-		log.Info("BtnNewUser clicked")
+		log.Info("BtnNewUser clicked by ", c.Sender().Username)
 
 		MenuIn.Inline(
 			MenuIn.Row(BtnShowUsers, BtnAddUser),
@@ -38,7 +38,7 @@ func NewUser() tb.HandlerFunc {
 
 func AddUser() tb.HandlerFunc {
 	return func(c tb.Context) error {
-		log.Info("BtnAddUser clicked")
+		log.Info("BtnAddUser clicked by ", c.Sender().Username)
 
 		utils.AddUserState(c.Chat().ID, entity.StateAddUserEmail, c.Message().ID+2)
 
@@ -52,7 +52,7 @@ func ShowUsers() tb.HandlerFunc {
 	return func(c tb.Context) error {
 		var data entity.ResponseData
 
-		log.Info("BtnShowUsers clicked")
+		log.Info("BtnShowUsers clicked by ", c.Sender().Username)
 
 		if err := utils.GetStruct(config.Args.USERS_URL, &data); err != nil {
 			log.Error(err)
