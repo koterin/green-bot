@@ -103,40 +103,9 @@ func OnCallback() tb.HandlerFunc {
 			if msgID == c.Message().ID {
 				switch state {
 				case entity.StateChooseUser:
-					utils.AddPermState(c.Chat().ID, "email", data)
-					msg = entity.TextChooseOriginMsg + data
-
-					if err := OriginsInlineKeyboard(MenuIn); err != nil {
-						c.Send(entity.TextInternalError)
-					}
-
-					utils.AddUserState(c.Chat().ID, entity.StateChooseHost, c.Message().ID+1)
-					c.Send(msg, MenuIn)
-
-					return c.Respond()
+					return ChoosingUser(c, data, &msg)
 				case entity.StateChooseHost:
-					email := utils.AddPermStates[c.Chat().ID]["email"]
-
-					status, err := utils.AddPermission(email)
-					if err != nil {
-						log.Error("Error adding permission: ", err)
-						c.Send(entity.TextInternalError)
-
-						return c.Respond()
-					}
-
-					msg = entity.TextInternalError
-					if status == http.StatusConflict {
-						msg = "У пользователя " + email + " уже есть доступ к " + data
-					}
-
-					if status == http.StatusCreated {
-						msg = "Выдали пользователю " + email + " доступ к сервису " + data
-					}
-
-					c.Send(msg)
-
-					return c.Respond()
+					return ChoosingHost(c, data, &msg)
 				}
 			}
 		}
@@ -145,4 +114,47 @@ func OnCallback() tb.HandlerFunc {
 
 		return c.Respond()
 	}
+}
+
+func ChoosingUser(c tb.Context, data string, msg *string) error {
+	utils.AddPermState(c.Chat().ID, "email", data)
+	*msg = entity.TextChooseOriginMsg + data
+
+	if err := OriginsInlineKeyboard(MenuIn); err != nil {
+		c.Send(entity.TextInternalError)
+
+		return c.Respond()
+	}
+
+	utils.AddUserState(c.Chat().ID, entity.StateChooseHost, c.Message().ID+1)
+	c.Send(*msg, MenuIn)
+
+	return c.Respond()
+}
+
+func ChoosingHost(c tb.Context, data string, msg *string) error {
+	email := utils.AddPermStates[c.Chat().ID]["email"]
+
+	status, err := utils.AddPermission(email, data)
+	if err != nil {
+		log.Error("Error adding permission: ", err)
+		c.Send(entity.TextInternalError)
+
+		return c.Respond()
+	}
+
+	*msg = entity.TextInternalError
+	if status == http.StatusConflict {
+		*msg = "У пользователя " + email + " уже есть доступ к " + data
+	}
+
+	if status == http.StatusCreated {
+		*msg = "Выдали пользователю " + email + " доступ к сервису " + data
+
+		delete(utils.AddPermStates[c.Chat().ID], "email")
+	}
+
+	c.Send(*msg)
+
+	return c.Respond()
 }
