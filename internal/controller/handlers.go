@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"net/http"
 	"strings"
 	"telegram/internal/entity"
 	"telegram/internal/utils"
@@ -116,14 +117,23 @@ func OnCallback() tb.HandlerFunc {
 				case entity.StateChooseHost:
 					email := utils.AddPermStates[c.Chat().ID]["email"]
 
-					/*if err := utils.AddPermission(email); err != nil {
+					status, err := utils.AddPermission(email)
+					if err != nil {
 						log.Error("Error adding permission: ", err)
 						c.Send(entity.TextInternalError)
 
 						return c.Respond()
-					}*/
+					}
 
-					msg = "Выдаем пользователю " + email + " доступ к сервису " + data
+					msg = entity.TextInternalError
+					if status == http.StatusConflict {
+						msg = "У пользователя " + email + " уже есть доступ к " + data
+					}
+
+					if status == http.StatusCreated {
+						msg = "Выдали пользователю " + email + " доступ к сервису " + data
+					}
+
 					c.Send(msg)
 
 					return c.Respond()

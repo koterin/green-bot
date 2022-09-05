@@ -185,3 +185,23 @@ func AddPermState(chatID int64, stage string, value string) {
 
 	log.Debug("current AddPermStates: ", AddPermStates)
 }
+
+func AddPermission(email string) (int, error) {
+	req, err := setRequest(map[string]string{
+		"email": fmt.Sprintf("%s", email),
+	}, config.Args.ADD_PERMISSION_URL)
+	if err != nil {
+		log.Error("Error setting request for .AddPermission: ", err)
+
+		return 0, err
+	}
+
+	resp, err := BackendClient.Do(&req)
+	if err != nil {
+		log.Error("Error sending request from .AddPermission to Backend: ", err)
+
+		return 0, err
+	}
+
+	return resp.StatusCode, nil
+}
