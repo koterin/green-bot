@@ -248,13 +248,13 @@ func NewUserToBackend(email string, chatID string) (int, error) {
 	return resp.StatusCode, nil
 }
 
-func CheckForSpaces(s string) bool {
+func CheckInput(s string) bool {
 	if s == "" {
 		return false
 	}
 
 	for _, ch := range s {
-		if ch == 32 {
+		if ch == 32 || ch == 92 || ch == 10 {
 			return false
 		}
 	}

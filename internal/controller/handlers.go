@@ -19,7 +19,7 @@ var (
 	BtnNewPermission = Menu.Text(entity.TextNewPermissionBtn)
 	BtnMyId          = Menu.Text(entity.TextMyID)
 	BtnShowOrigins   = MenuIn.Data(entity.TextCurrentOriginsBtn, "origins")
-	BtnShowUsers     = Menu.Data(entity.TextShowUsersBtn, "users")
+	BtnShowUsers     = MenuIn.Data(entity.TextShowUsersBtn, "users")
 	BtnAddOrigin     = MenuIn.Data(entity.TextAddOriginBtn, "newOrigin")
 	BtnAddUser       = MenuIn.Data(entity.TextAddUserBtn, "newUser")
 )
@@ -38,10 +38,8 @@ func OnStart() tb.HandlerFunc {
 				log.Info("Admin user signed in: ", c.Sender().Username)
 
 				Menu.Reply(
-					Menu.Row(BtnMyId),
-					Menu.Row(BtnNewUser),
-					Menu.Row(BtnNewOrigin),
-					Menu.Row(BtnNewPermission),
+					Menu.Row(BtnMyId, BtnNewUser),
+					Menu.Row(BtnNewOrigin, BtnNewPermission),
 				)
 			}
 		}
@@ -157,7 +155,7 @@ func AddingOrigin(c tb.Context) error {
 		MenuIn.Row(BtnShowOrigins, BtnAddOrigin),
 	)
 
-	if valid := utils.CheckForSpaces(c.Message().Text); !valid {
+	if valid := utils.CheckInput(c.Message().Text); !valid {
 		return c.Send(entity.TextSpacesNotAllowed, MenuIn)
 	}
 
@@ -169,7 +167,7 @@ func AddingOrigin(c tb.Context) error {
 }
 
 func InsertingEmail(c tb.Context) error {
-	if valid := utils.CheckForSpaces(c.Message().Text); !valid {
+	if valid := utils.CheckInput(c.Message().Text); !valid {
 		MenuIn.Inline(
 			MenuIn.Row(BtnShowUsers, BtnAddUser),
 		)
@@ -192,7 +190,7 @@ func InsertingChatID(c tb.Context) error {
 		MenuIn.Row(BtnShowUsers, BtnAddUser),
 	)
 
-	if valid := utils.CheckForSpaces(c.Message().Text); !valid {
+	if valid := utils.CheckInput(c.Message().Text); !valid {
 		return c.Send(entity.TextSpacesNotAllowed, MenuIn)
 	}
 
