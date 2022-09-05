@@ -55,7 +55,6 @@ func OnText() tb.HandlerFunc {
 		var (
 			state string
 			msgID int
-			msg   string
 		)
 
 		if _, userExist := utils.UserStates[c.Chat().ID]; !userExist {
@@ -66,43 +65,11 @@ func OnText() tb.HandlerFunc {
 			if msgID == c.Message().ID {
 				switch state {
 				case entity.StateAddOrigin:
-					msg = utils.ValidateOrigin(c.Message().Text)
-
-					MenuIn.Inline(
-						MenuIn.Row(BtnShowOrigins, BtnAddOrigin),
-					)
-
-					return c.Send(msg, MenuIn)
+					return AddingOrigin(c)
 				case entity.StateAddUserEmail:
-					utils.AddNewUserState(c.Chat().ID, "email", c.Message().Text)
-					utils.AddUserState(c.Chat().ID, entity.StateAddUserChatID, c.Message().ID+2)
-					msg = entity.TextSendChatIDMsg
-
-					return c.Send(msg)
+					return InsertingEmail(c)
 				case entity.StateAddUserChatID:
-					email := utils.NewUserStates[c.Chat().ID]["email"]
-
-					status, err := utils.NewUserToBackend(email, c.Message().Text)
-					if err != nil {
-						return c.Send(entity.TextInternalError)
-					}
-
-					delete(utils.NewUserStates[c.Chat().ID], "email")
-
-					msg = entity.TextInternalError
-					if status == http.StatusCreated {
-						msg = "Пользователь " + email + " успешно добавлен"
-					}
-
-					if status == http.StatusConflict {
-						msg = "Пользователь " + email + " уже существует"
-					}
-
-					MenuIn.Inline(
-						MenuIn.Row(BtnShowUsers, BtnAddUser),
-					)
-
-					return c.Send(msg, MenuIn)
+					return InsertingChatID(c)
 				}
 			}
 		}
@@ -114,7 +81,6 @@ func OnText() tb.HandlerFunc {
 func OnCallback() tb.HandlerFunc {
 	return func(c tb.Context) error {
 		var (
-			msg   string
 			data  string
 			state string
 			msgID int
@@ -130,9 +96,9 @@ func OnCallback() tb.HandlerFunc {
 			if msgID == c.Message().ID {
 				switch state {
 				case entity.StateChooseUser:
-					return ChoosingUser(c, data, &msg)
+					return ChoosingUser(c, data)
 				case entity.StateChooseHost:
-					return ChoosingHost(c, data, &msg)
+					return ChoosingHost(c, data)
 				}
 			}
 		}
@@ -143,9 +109,9 @@ func OnCallback() tb.HandlerFunc {
 	}
 }
 
-func ChoosingUser(c tb.Context, data string, msg *string) error {
+func ChoosingUser(c tb.Context, data string) error {
 	utils.AddPermState(c.Chat().ID, "email", data)
-	*msg = entity.TextChooseOriginMsg + data
+	msg := entity.TextChooseOriginMsg + data
 
 	if err := OriginsInlineKeyboard(MenuIn); err != nil {
 		c.Send(entity.TextInternalError)
@@ -154,12 +120,12 @@ func ChoosingUser(c tb.Context, data string, msg *string) error {
 	}
 
 	utils.AddUserState(c.Chat().ID, entity.StateChooseHost, c.Message().ID+1)
-	c.Send(*msg, MenuIn)
+	c.Send(msg, MenuIn)
 
 	return c.Respond()
 }
 
-func ChoosingHost(c tb.Context, data string, msg *string) error {
+func ChoosingHost(c tb.Context, data string) error {
 	email := utils.AddPermStates[c.Chat().ID]["email"]
 
 	status, err := utils.AddPermission(email, data)
@@ -170,18 +136,63 @@ func ChoosingHost(c tb.Context, data string, msg *string) error {
 		return c.Respond()
 	}
 
-	*msg = entity.TextInternalError
+	msg := entity.TextInternalError
 	if status == http.StatusConflict {
-		*msg = "У пользователя " + email + " уже есть доступ к " + data
+		msg = "У пользователя " + email + " уже есть доступ к " + data
 	}
 
 	if status == http.StatusCreated {
-		*msg = "Выдали пользователю " + email + " доступ к сервису " + data
+		msg = "Выдали пользователю " + email + " доступ к сервису " + data
 
 		delete(utils.AddPermStates[c.Chat().ID], "email")
 	}
 
-	c.Send(*msg)
+	c.Send(msg)
 
 	return c.Respond()
+}
+
+func AddingOrigin(c tb.Context) error {
+	msg := utils.ValidateOrigin(c.Message().Text)
+
+	MenuIn.Inline(
+		MenuIn.Row(BtnShowOrigins, BtnAddOrigin),
+	)
+
+	return c.Send(msg, MenuIn)
+}
+
+func InsertingEmail(c tb.Context) error {
+	utils.AddNewUserState(c.Chat().ID, "email", c.Message().Text)
+	utils.AddUserState(c.Chat().ID, entity.StateAddUserChatID, c.Message().ID+2)
+
+	msg := entity.TextSendChatIDMsg
+
+	return c.Send(msg)
+}
+
+func InsertingChatID(c tb.Context) error {
+	email := utils.NewUserStates[c.Chat().ID]["email"]
+
+	status, err := utils.NewUserToBackend(email, c.Message().Text)
+	if err != nil {
+		return c.Send(entity.TextInternalError)
+	}
+
+	delete(utils.NewUserStates[c.Chat().ID], "email")
+
+	msg := entity.TextInternalError
+	if status == http.StatusCreated {
+		msg = "Пользователь " + email + " успешно добавлен"
+	}
+
+	if status == http.StatusConflict {
+		msg = "Пользователь " + email + " уже существует"
+	}
+
+	MenuIn.Inline(
+		MenuIn.Row(BtnShowUsers, BtnAddUser),
+	)
+
+	return c.Send(msg, MenuIn)
 }
