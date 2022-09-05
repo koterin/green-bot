@@ -61,7 +61,7 @@ func ShowUsers() tb.HandlerFunc {
 			return c.Respond()
 		}
 
-		users := utils.GetUserString(data.Users)
+		users := utils.GetUsersString(data.Users)
 
 		MenuIn.Inline(
 			MenuIn.Row(BtnShowUsers, BtnAddUser),

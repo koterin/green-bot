@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 
 	"telegram/config"
@@ -38,8 +39,8 @@ func GetId(m *tb.Message) string {
 }
 
 func IsAdmin(chatId int) error {
-	req, err := setRequest(map[string]string{
-		"chat-id": fmt.Sprintf("%d", chatId),
+	req, err := setRequest(entity.Payload{
+		ChatID: strconv.Itoa(chatId),
 	}, config.Args.AUTH_URL)
 	if err != nil {
 		log.Error("Error setting request for admin: ", err)
@@ -61,7 +62,7 @@ func IsAdmin(chatId int) error {
 	return nil
 }
 
-func setRequest(payload map[string]string, url string) (http.Request, error) {
+func setRequest(payload entity.Payload, url string) (http.Request, error) {
 	body, err := json.Marshal(payload)
 	if err != nil {
 		return http.Request{}, fmt.Errorf("Error creating json body: %w", err)
@@ -84,24 +85,24 @@ func setHeaders(req *http.Request) {
 	req.Header.Set("Api-Key", config.Args.API_KEY)
 }
 
-func GetOriginString(origs []entity.Origs) string {
-	var hosts string
+func GetUsersString(l []entity.User) string {
+	var str string
 
-	for _, host := range origs {
-		hosts += host.Origin + "\n"
+	for _, elem := range l {
+		str += elem.User + "\n"
 	}
 
-	return hosts
+	return str
 }
 
-func GetUserString(users []entity.User) string {
-	var u string
+func GetOriginString(l []entity.Origs) string {
+	var str string
 
-	for _, user := range users {
-		u += user.User + "\n"
+	for _, elem := range l {
+		str += elem.Origin + "\n"
 	}
 
-	return u
+	return str
 }
 
 func GetStruct(url string, data *entity.ResponseData) error {
@@ -153,11 +154,11 @@ func AddUserState(chatID int64, state string, msgID int) {
 	UserStates[chatID][state] = msgID
 }
 
-func ValidateOrigin(origin string) string {
+func AddOriginToBackend(origin string) string {
 	var data entity.ResponseData
 
-	req, err := setRequest(map[string]string{
-		"origin": origin,
+	req, err := setRequest(entity.Payload{
+		Origin: origin,
 	}, config.Args.NEW_ORIGIN_URL)
 	if err != nil {
 		log.Error("Error setting request for .ValidateOrigin: ", err)
@@ -206,9 +207,9 @@ func AddNewUserState(chatID int64, param string, value string) {
 }
 
 func AddPermission(email string, origin string) (int, error) {
-	req, err := setRequest(map[string]string{
-		"email":  fmt.Sprintf("%s", email),
-		"origin": fmt.Sprintf("%s", origin),
+	req, err := setRequest(entity.Payload{
+		Email:  email,
+		Origin: origin,
 	}, config.Args.ADD_PERMISSION_URL)
 	if err != nil {
 		log.Error("Error setting request for .AddPermission: ", err)
@@ -227,9 +228,9 @@ func AddPermission(email string, origin string) (int, error) {
 }
 
 func NewUserToBackend(email string, chatID string) (int, error) {
-	req, err := setRequest(map[string]string{
-		"email":   fmt.Sprintf("%s", email),
-		"chat-id": fmt.Sprintf("%s", chatID),
+	req, err := setRequest(entity.Payload{
+		Email:  email,
+		ChatID: chatID,
 	}, config.Args.NEW_USER_URL)
 	if err != nil {
 		log.Error("Error setting request for .NewUserToBackend: ", err)
@@ -245,4 +246,18 @@ func NewUserToBackend(email string, chatID string) (int, error) {
 	}
 
 	return resp.StatusCode, nil
+}
+
+func CheckForSpaces(s string) bool {
+	if s == "" {
+		return false
+	}
+
+	for _, ch := range s {
+		if ch == 32 {
+			return false
+		}
+	}
+
+	return true
 }

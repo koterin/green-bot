@@ -9,6 +9,12 @@ type ResponseData struct {
 	Users    []User  `json:"users,omitempty"`
 }
 
+type Payload struct {
+	Email  string `json:"email"`
+	ChatID string `json:"chat-id"`
+	Origin string `json:"origin"`
+}
+
 type Origs struct {
 	Origin string `json:"origin,omitempty"`
 }

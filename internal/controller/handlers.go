@@ -153,16 +153,28 @@ func ChoosingHost(c tb.Context, data string) error {
 }
 
 func AddingOrigin(c tb.Context) error {
-	msg := utils.ValidateOrigin(c.Message().Text)
-
 	MenuIn.Inline(
 		MenuIn.Row(BtnShowOrigins, BtnAddOrigin),
 	)
+
+	if valid := utils.CheckForSpaces(c.Message().Text); !valid {
+		return c.Send(entity.TextSpacesNotAllowed, MenuIn)
+	}
+
+	msg := utils.AddOriginToBackend(c.Message().Text)
 
 	return c.Send(msg, MenuIn)
 }
 
 func InsertingEmail(c tb.Context) error {
+	if valid := utils.CheckForSpaces(c.Message().Text); !valid {
+		MenuIn.Inline(
+			MenuIn.Row(BtnShowUsers, BtnAddUser),
+		)
+
+		return c.Send(entity.TextSpacesNotAllowed, MenuIn)
+	}
+
 	utils.AddNewUserState(c.Chat().ID, "email", c.Message().Text)
 	utils.AddUserState(c.Chat().ID, entity.StateAddUserChatID, c.Message().ID+2)
 
@@ -172,11 +184,19 @@ func InsertingEmail(c tb.Context) error {
 }
 
 func InsertingChatID(c tb.Context) error {
+	MenuIn.Inline(
+		MenuIn.Row(BtnShowUsers, BtnAddUser),
+	)
+
+	if valid := utils.CheckForSpaces(c.Message().Text); !valid {
+		return c.Send(entity.TextSpacesNotAllowed, MenuIn)
+	}
+
 	email := utils.NewUserStates[c.Chat().ID]["email"]
 
 	status, err := utils.NewUserToBackend(email, c.Message().Text)
 	if err != nil {
-		return c.Send(entity.TextInternalError)
+		return c.Send(entity.TextInternalError, MenuIn)
 	}
 
 	delete(utils.NewUserStates[c.Chat().ID], "email")
@@ -189,10 +209,6 @@ func InsertingChatID(c tb.Context) error {
 	if status == http.StatusConflict {
 		msg = "Пользователь " + email + " уже существует"
 	}
-
-	MenuIn.Inline(
-		MenuIn.Row(BtnShowUsers, BtnAddUser),
-	)
 
 	return c.Send(msg, MenuIn)
 }
